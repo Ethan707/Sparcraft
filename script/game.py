@@ -1,6 +1,7 @@
-from RandomPlayer import RandomPlayer
+from Player_Random import RandomPlayer
+from Player_AttackClosest import AttackClosest
 from subprocess import Popen, PIPE
-from gamestate import GameState, Unit
+from GameState import GameState, Unit
 SPARCRAFT = '../bin/SparCraft'
 
 
@@ -64,9 +65,9 @@ def processGameState(process: Popen, game: GameState):
 
 
 def returnMoves(process: Popen, decision: list):
-    for i in decision:
-        process.stdin.write(str.encode(str(i)+'\n'))
-        process.stdin.flush()
+    moveString = ' '.join(str(i) for i in decision)+'\n'
+    process.stdin.write(str.encode(moveString))
+    process.stdin.flush()
 
 
 if __name__ == '__main__':
@@ -86,6 +87,7 @@ if __name__ == '__main__':
 
     game = GameState()
     player = RandomPlayer()
+    player = AttackClosest()
 
     for i in range(num_exp):
         isRoundEnd = False

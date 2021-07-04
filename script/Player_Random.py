@@ -3,8 +3,8 @@ import random
 
 
 class RandomPlayer:
-    def __init__(self):
-        pass
+    def __init__(self, player_id):
+        self.player_id = player_id
 
     def generate(self, game: GameState):
         result = []
