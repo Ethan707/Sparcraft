@@ -4,15 +4,22 @@ from subprocess import Popen, PIPE
 from GameState import GameState, Unit
 SPARCRAFT = '../bin/SparCraft'
 
+PLAYER_ONE = 0
+PLAYER_TWO = 1
+
 
 def processMessage(process: Popen, split=' ') -> list:
     '''
-    convert bytes into string and split it into list
+    @description: convert bytes into string and split it into list
+    @param {Popen} process: the process of sparcraft
+    @param {string} split: the split flag
+    @return {list}: the list of the string
+
     '''
     return process.stdout.readline().decode('utf-8').replace('\n', '').replace('\r', '').split(split)
 
 
-def processGameState(process: Popen, game: GameState):
+def processGameState(process: Popen, game: GameState) -> None:
     message = processMessage(process)
 
     while message[0] != "End":
@@ -27,13 +34,12 @@ def processGameState(process: Popen, game: GameState):
                 player = int(message[1])
                 hp = int(message[2])
                 firstTimeFree = int(message[3])
-                position_x = int(message[4])
-                position_y = int(message[5])
+                position = [int(message[4]), int(message[5])]
+                range = int(message[6])
+                damage = int(message[7])
+                dpf = float(message[8])
                 # set up the unit
-                unit = Unit()
-                unit.setPosition(position_x, position_y)
-                unit.setHP(hp)
-                unit.setFirstTimeFree(firstTimeFree)
+                unit = Unit(position, hp, range, damage, dpf)
                 # add unit to game state
                 if player == 0:
                     game.addUnit(unit)
@@ -64,7 +70,14 @@ def processGameState(process: Popen, game: GameState):
     # return game
 
 
-def returnMoves(process: Popen, decision: list):
+def returnMoves(process: Popen, decision: list) -> None:
+    '''
+    @description: return the move string to sparcraft
+    @param {Popen} process: the process of sparcraft
+    @param {list} decision: the move list (int)
+    @return {*}
+    '''
+
     moveString = ' '.join(str(i) for i in decision)+'\n'
     process.stdin.write(str.encode(moveString))
     process.stdin.flush()
@@ -86,12 +99,16 @@ if __name__ == '__main__':
     winner = [0]*3  # player 0 | player 1 | draw
 
     game = GameState()
-    player = RandomPlayer()
-    player = AttackClosest()
+    # player = RandomPlayer()
+    player = AttackClosest(0)
 
     for i in range(num_exp):
         isRoundEnd = False
         while not isRoundEnd:
+            # three occasions:
+            # 1.gamestate infomation
+            # 2.win
+            # 3.draw
             message = processMessage(process)
             if message[0] == "Begin":
                 # the game is still in progressing, we need to keep it
@@ -110,6 +127,10 @@ if __name__ == '__main__':
                 winner[-1] += 1
                 isRoundEnd = True
                 print("Draw")
+            else:
+                print("Error: ", ' '.join(message))
+                raise Exception
             game.clear()
+
     # result of experiment
     print("Player 0:", winner[0], "\nPlayer 1:", winner[1], "\nDraw:", winner[2])

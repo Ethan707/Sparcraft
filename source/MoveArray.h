@@ -4,6 +4,7 @@
 #include "Array.hpp"
 #include "Unit.h"
 #include "Action.h"
+#include "GameState.h"
 
 namespace SparCraft
 {

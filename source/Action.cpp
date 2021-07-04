@@ -83,7 +83,12 @@ const std::string Action::debugString() const
 {
 	std::stringstream ss;
 	ss << "Move"
-	   << " " << (int)unit() << " " << (int)player() << " " << (int)type() << " " << (int)index() << " "
-	   << pos().x() << " " << pos().y();
+	   << " " << (int)unit()
+	   << " " << (int)player()
+	   << " " << (int)type()
+	   << " " << (int)index()
+	   << " " << pos().x()
+	   << " " << pos().y();
+
 	return ss.str();
 }
