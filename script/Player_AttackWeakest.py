@@ -1,8 +1,16 @@
+'''
+Author: Ethan Chen
+Date: 2021-07-05 07:25:46
+LastEditTime: 2021-07-05 07:40:22
+LastEditors: Ethan Chen
+Description: Attack enemy based on hp
+FilePath: \Sparcraft\script\Player_AttackWeakest.py
+'''
 from GameState import GameState
 from Constant import *
 
 
-class AttackClosest:
+class AttackWeakest:
     def __init__(self, palyer_id):
         self.palyer_id = palyer_id
 
@@ -13,7 +21,7 @@ class AttackClosest:
             foundAction = False
             actionMoveIndex = 0
             closestMoveIndex = 0
-            actionDistance = 100000000000
+            actionLowestHP = 100000000000
             closestMoveDistance = 100000000000
             # format of move: [moveType, moveIndex, position_x, position_y]
             if len(unit.moves) > 0:
@@ -24,9 +32,9 @@ class AttackClosest:
 
                     if moveType == ATTACK:
                         enemy = game.enemy_unit[moveIndex]
-                        distance = unit.getDistanceToUnit(enemy)
-                        if distance < actionDistance:
-                            actionDistance = distance
+                        # distance = unit.getDistanceToUnit(enemy)
+                        if enemy.hp < actionLowestHP:
+                            actionLowestHP = enemy.hp
                             actionMoveIndex = i
                             foundAction = True
 

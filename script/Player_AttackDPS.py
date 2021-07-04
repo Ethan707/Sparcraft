@@ -1,10 +1,18 @@
+'''
+Author: Ethan Chen
+Date: 2021-07-05 07:10:58
+LastEditTime: 2021-07-05 07:24:49
+LastEditors: Ethan Chen
+Description: Attack enemy based on DPS
+FilePath: \Sparcraft\script\Player_AttackDPS.py
+'''
 from GameState import GameState
 from Constant import *
 
 
-class AttackClosest:
-    def __init__(self, palyer_id):
-        self.palyer_id = palyer_id
+class AttackDPS:
+    def __init__(self, player_id):
+        self.player_id = player_id
 
     def generate(self, game: GameState):
         result = []
@@ -13,7 +21,7 @@ class AttackClosest:
             foundAction = False
             actionMoveIndex = 0
             closestMoveIndex = 0
-            actionDistance = 100000000000
+            actionHighestDPS = 0
             closestMoveDistance = 100000000000
             # format of move: [moveType, moveIndex, position_x, position_y]
             if len(unit.moves) > 0:
@@ -24,9 +32,9 @@ class AttackClosest:
 
                     if moveType == ATTACK:
                         enemy = game.enemy_unit[moveIndex]
-                        distance = unit.getDistanceToUnit(enemy)
-                        if distance < actionDistance:
-                            actionDistance = distance
+                        dpsHPValue = enemy.dpf/enemy.hp
+                        if dpsHPValue > actionHighestDPS:
+                            actionHighestDPS = dpsHPValue
                             actionMoveIndex = i
                             foundAction = True
 

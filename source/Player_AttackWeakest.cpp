@@ -26,7 +26,7 @@ void Player_AttackWeakest::getMoves(GameState &state, const MoveArray &moves, st
 		{
 			const Action move(moves.getMove(u, m));
 
-			std::cout << move.debugString() << std::endl;
+			// std::cout << move.debugString() << std::endl;
 
 			if (move.type() == ActionTypes::ATTACK)
 			{

@@ -1,8 +1,5 @@
 import numpy as np
-ATTACK = 1
-MOVE = 3
-RELOAD = 2
-MOVE_DIR = [[-1, 0], [1, 0], [0, 1], [0, -1]]
+from Constant import *
 # const int SparCraft::Constants::Move_Dir[4][2] = {{-1, 0}, {1, 0}, {0, 1}, {0, -1}}
 
 
