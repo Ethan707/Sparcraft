@@ -1,4 +1,4 @@
-from gamestate import GameState
+from GameState import GameState
 import random
 
 

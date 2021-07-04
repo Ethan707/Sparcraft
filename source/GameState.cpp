@@ -1053,7 +1053,7 @@ void GameState::print(int indent) const
 			TABS(indent);
 			// Unit {Player} {HP} {firstTimeFree} {Position x} {Position y}
 			// TODO: dps, range, canAttack, Distance
-			fprintf(stdout, "Unit %d %d %d %d %d %d %f\n",
+			fprintf(stdout, "Unit %d %d %d %d %d %d %d %f\n",
 					unit.player(),
 					unit.currentHP(),
 					unit.firstTimeFree(),

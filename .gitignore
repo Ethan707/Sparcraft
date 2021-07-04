@@ -8,3 +8,7 @@ bin/*.dll
 bin/*.exe
 source/*.o
 .vscode
+script/*.txt
+script/__pycache__
+source/gui/*.o
+source/main/*.o
