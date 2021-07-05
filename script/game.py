@@ -1,5 +1,8 @@
 from Player_Random import RandomPlayer
 from Player_AttackClosest import AttackClosest
+from Player_AttackWeakest import AttackWeakest
+from Player_Kiter_NOKDPS import Kiter_NOKDPS
+from Player_NOKDPS import NOKDPS
 from subprocess import Popen, PIPE
 from GameState import GameState, Unit
 SPARCRAFT = '../bin/SparCraft'
@@ -41,7 +44,8 @@ def processGameState(process: Popen, game: GameState) -> None:
                 # set up the unit
                 unit = Unit(position, hp, range, damage, dpf)
                 # add unit to game state
-                if player == 0:
+
+                if player == game.player_id:
                     game.addUnit(unit)
                 else:
                     game.addEnemy(unit)
@@ -100,7 +104,9 @@ if __name__ == '__main__':
 
     game = GameState()
     # player = RandomPlayer()
-    player = AttackClosest(0)
+
+    playerZero = AttackClosest(0)
+    playerOne = RandomPlayer(1)
 
     for i in range(num_exp):
         isRoundEnd = False
@@ -112,8 +118,14 @@ if __name__ == '__main__':
             message = processMessage(process)
             if message[0] == "Begin":
                 # the game is still in progressing, we need to keep it
+                player_message = processMessage(process)
+                assert player_message[0] == "PlayerID"
+                game.player_id = int(player_message[1])
                 processGameState(process, game)
-                decision = player.generate(game)
+                if game.player_id == 0:
+                    decision = playerZero.generate(game)
+                else:
+                    decision = playerOne.generate(game)
                 # print(decision)
                 # Return the move to sparcraft
                 returnMoves(process, decision)

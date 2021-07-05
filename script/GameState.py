@@ -1,3 +1,11 @@
+'''
+Author: Ethan Chen
+Date: 2021-07-04 11:22:06
+LastEditTime: 2021-07-05 20:23:11
+LastEditors: Ethan Chen
+Description: Game state class
+FilePath: \Sparcraft\script\GameState.py
+'''
 import numpy as np
 from Constant import *
 # const int SparCraft::Constants::Move_Dir[4][2] = {{-1, 0}, {1, 0}, {0, 1}, {0, -1}}
@@ -41,8 +49,16 @@ class Unit:
 class GameState:
     def __init__(self):
         self.time = 0
+        self.player_id = 0
         self.player_unit = []
         self.enemy_unit = []
+
+    def getPlayerId(self) -> int:
+        return self.player_id
+
+    def getEnemy(self, player_id: int) -> int:
+        assert (player_id == 1 or player_id == 0)
+        return 1-player_id
 
     def setTime(self, time):
         self.time = time

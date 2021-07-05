@@ -1,3 +1,11 @@
+<!--
+ * @Author: Ethan Chen
+ * @Date: 2021-07-04 11:22:06
+ * @LastEditTime: 2021-07-05 19:57:42
+ * @LastEditors: Ethan Chen
+ * @Description: 
+ * @FilePath: \Sparcraft\README.md
+-->
 # Sparcraft
 
 Compilation Instructions:
@@ -85,3 +93,16 @@ Action::Action(
 `playerIndex` -> unit's owner
 
 `moveIndex` -> Here is the **index of direction，not the move target**
+
+## DSL for Sparcarft
+
+TODO
+
+### TODO List
+
+1. Add Bottom Up Search
+2. Add player id to Player_Python
+3. Test 2 python players at the same time and paly
+   1. Python random vs Python random
+   2. Python AttackClosest vs Python AttackClosest
+   3. Python random vs Python AttackClosest

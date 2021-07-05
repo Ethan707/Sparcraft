@@ -12,3 +12,4 @@ script/*.txt
 script/__pycache__
 source/gui/*.o
 source/main/*.o
+.history
