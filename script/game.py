@@ -1,5 +1,8 @@
 from Player_Random import RandomPlayer
 from Player_AttackClosest import AttackClosest
+from Player_AttackWeakest import AttackWeakest
+from Player_Kiter_NOKDPS import Kiter_NOKDPS
+from Player_NOKDPS import NOKDPS
 from subprocess import Popen, PIPE
 from GameState import GameState, Unit
 SPARCRAFT = '../bin/SparCraft'
