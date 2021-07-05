@@ -1,7 +1,7 @@
 # Player 0 AlphaBeta 10 20 ScriptFirst Playout NOKDPS NOKDPS Alternate None
 # Player 1 PortfolioGreedySearch 10 NOKDPS 1 0
 Player 0 Python
-Player 1 Random
+Player 1 Python
 State StateSymmetricVerticalLine 10 256 256 Protoss_Dragoon 16 Protoss_Zealot 16
 ResultsFile PATH_TO\sample_exp true
 # MapFile ../destination.txt

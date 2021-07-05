@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-04 11:22:06
-LastEditTime: 2021-07-05 16:30:17
+LastEditTime: 2021-07-05 20:23:11
 LastEditors: Ethan Chen
 Description: Game state class
 FilePath: \Sparcraft\script\GameState.py
@@ -49,8 +49,12 @@ class Unit:
 class GameState:
     def __init__(self):
         self.time = 0
+        self.player_id = 0
         self.player_unit = []
         self.enemy_unit = []
+
+    def getPlayerId(self) -> int:
+        return self.player_id
 
     def getEnemy(self, player_id: int) -> int:
         assert (player_id == 1 or player_id == 0)
