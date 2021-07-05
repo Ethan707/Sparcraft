@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 07:10:58
-LastEditTime: 2021-07-05 07:24:49
+LastEditTime: 2021-07-05 09:55:39
 LastEditors: Ethan Chen
 Description: Attack enemy based on DPS
 FilePath: \Sparcraft\script\Player_AttackDPS.py
@@ -31,7 +31,7 @@ class AttackDPS:
                     moveIndex = move[1]
 
                     if moveType == ATTACK:
-                        enemy = game.enemy_unit[moveIndex]
+                        enemy = game.getEnemyByIndex(moveIndex)
                         dpsHPValue = enemy.dpf/enemy.hp
                         if dpsHPValue > actionHighestDPS:
                             actionHighestDPS = dpsHPValue

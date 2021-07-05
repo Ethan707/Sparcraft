@@ -58,10 +58,14 @@ class GameState:
     def addEnemy(self, unit: Unit):
         self.enemy_unit.append(unit)
 
-    def getUnitByIndex(self, index):
+    def getUnitByIndex(self, index) -> Unit:
         assert 0 <= index < len(self.player_unit)
         return self.player_unit[index]
 
-    def getClosestEnemyUnit(self, unit: Unit):
-        index = np.argmin([i.getDistanceToUnit(unit) for i in self.enemy_unit])
+    def getEnemyByIndex(self, index) -> Unit:
+        assert 0 <= index < len(self.enemy_unit)
         return self.enemy_unit[index]
+
+    def getClosestEnemyUnit(self, unit: Unit) -> Unit:
+        index = np.argmin([i.getDistanceToUnit(unit) for i in self.enemy_unit])
+        return self.getEnemyByIndex(index)

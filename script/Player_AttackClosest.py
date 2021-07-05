@@ -23,7 +23,7 @@ class AttackClosest:
                     moveIndex = move[1]
 
                     if moveType == ATTACK:
-                        enemy = game.enemy_unit[moveIndex]
+                        enemy = game.getEnemyByIndex(moveIndex)
                         distance = unit.getDistanceToUnit(enemy)
                         if distance < actionDistance:
                             actionDistance = distance
