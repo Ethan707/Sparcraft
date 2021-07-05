@@ -89,7 +89,7 @@ def returnMoves(process: Popen, decision: list) -> None:
 
 if __name__ == '__main__':
     # open Sparcraft as subprocess
-    experiment_file = '../sample_experiment/test_exp.txt'
+    experiment_file = '../experiment.txt'
     process = Popen([SPARCRAFT, experiment_file], stdin=PIPE, stdout=PIPE)
     message = processMessage(process)
 
