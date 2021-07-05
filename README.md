@@ -1,7 +1,7 @@
 <!--
  * @Author: Ethan Chen
  * @Date: 2021-07-04 11:22:06
- * @LastEditTime: 2021-07-05 19:57:42
+ * @LastEditTime: 2021-07-05 20:58:34
  * @LastEditors: Ethan Chen
  * @Description: 
  * @FilePath: \Sparcraft\README.md
@@ -101,8 +101,9 @@ TODO
 ### TODO List
 
 1. Add Bottom Up Search
-2. Add player id to Player_Python
-3. Test 2 python players at the same time and paly
-   1. Python random vs Python random
-   2. Python AttackClosest vs Python AttackClosest
-   3. Python random vs Python AttackClosest
+2. Add simulated annealing
+3. ~~Add player id to Player_Python~~
+4. ~~Test 2 python players at the same time and paly~~
+   1. ~~Python random vs Python random~~
+   2. ~~Python AttackClosest vs Python AttackClosest~~
+   3. ~~Python random vs Python AttackClosest~~
