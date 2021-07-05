@@ -5,7 +5,7 @@ from Player_Kiter_NOKDPS import Kiter_NOKDPS
 from Player_NOKDPS import NOKDPS
 from subprocess import Popen, PIPE
 from GameState import GameState, Unit
-SPARCRAFT = '../bin/SparCraft'
+SPARCRAFT = '../SparCraft'
 
 PLAYER_ONE = 0
 PLAYER_TWO = 1
@@ -89,7 +89,7 @@ def returnMoves(process: Popen, decision: list) -> None:
 
 if __name__ == '__main__':
     # open Sparcraft as subprocess
-    experiment_file = '../experiment.txt'
+    experiment_file = '../test_exp.txt'
     process = Popen([SPARCRAFT, experiment_file], stdin=PIPE, stdout=PIPE)
     message = processMessage(process)
 
@@ -122,7 +122,6 @@ if __name__ == '__main__':
                 assert player_message[0] == "PlayerID"
                 game.player_id = int(player_message[1])
                 processGameState(process, game)
-                # FIXME: still need to improve here
                 if game.player_id == 0:
                     decision = playerZero.generate(game)
                 else:
