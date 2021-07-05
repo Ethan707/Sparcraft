@@ -105,8 +105,8 @@ if __name__ == '__main__':
     game = GameState()
     # player = RandomPlayer()
 
-    playerZero = AttackClosest(0)
-    playerOne = RandomPlayer(1)
+    playerZero = NOKDPS(0)
+    playerOne = AttackWeakest(1)
 
     for i in range(num_exp):
         isRoundEnd = False

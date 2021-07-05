@@ -3,6 +3,6 @@
 Player 0 Python
 Player 1 Python
 State StateSymmetricVerticalLine 10 256 256 Protoss_Dragoon 16 Protoss_Zealot 16
-ResultsFile PATH_TO\sample_exp true
+ResultsFile PATH_TO\sample_exp false
 # MapFile ../destination.txt
 Display false ../starcraft_images/
