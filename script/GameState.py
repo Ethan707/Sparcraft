@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-04 11:22:06
-LastEditTime: 2021-07-05 20:23:11
+LastEditTime: 2021-07-07 15:43:16
 LastEditors: Ethan Chen
 Description: Game state class
 FilePath: \Sparcraft\script\GameState.py
