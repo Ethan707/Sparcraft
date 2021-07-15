@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-04 11:22:06
-LastEditTime: 2021-07-07 15:43:16
+LastEditTime: 2021-07-15 10:42:02
 LastEditors: Ethan Chen
 Description: Game state class
 FilePath: \Sparcraft\script\GameState.py
@@ -45,6 +45,20 @@ class Unit:
     def getDistanceToUnit(self, unit):
         return self.getDistanceToPosition(unit.position)
 
+    def getActionsByType(self, type) -> list:
+        moves = []
+        for move in self.moves:
+            if move[0] == type:
+                moves.append(move)
+        return moves
+
+    def getMoveDistanceList(self) -> list:
+        result = []
+        moves = self.getActionsByType(MOVE)
+        for i in moves:
+            result.append(self.getDistanceToPosition([i[-2], i[-1]]))
+        return result
+
 
 class GameState:
     def __init__(self):
@@ -85,3 +99,12 @@ class GameState:
     def getClosestEnemyUnit(self, unit: Unit) -> Unit:
         index = np.argmin([i.getDistanceToUnit(unit) for i in self.enemy_unit])
         return self.getEnemyByIndex(index)
+
+    def getEnemyDistanceFromUnit(self, unit: Unit) -> list:
+        distance = [i.getDistanceToUnit(unit) for i in self.enemy_unit]
+        index = [i[1] for i in unit.getActionsByType(ATTACK)]
+        return [distance[i] for i in index]
+
+    def getEnemyFromUnit(self, unit: Unit) -> list:
+        index = [i[1] for i in unit.getActionsByType(ATTACK)]
+        return [self.enemy_unit[i] for i in index]

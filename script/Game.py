@@ -5,145 +5,159 @@ from Player_Kiter_NOKDPS import Kiter_NOKDPS
 from Player_NOKDPS import NOKDPS
 from subprocess import Popen, PIPE
 from GameState import GameState, Unit
-SPARCRAFT = '../bin/SparCraft'
 
 PLAYER_ONE = 0
 PLAYER_TWO = 1
 
 
-def processMessage(process: Popen, split=' ') -> list:
-    '''
-    @description: convert bytes into string and split it into list
-    @param {Popen} process: the process of sparcraft
-    @param {string} split: the split flag
-    @return {list}: the list of the string
+class Game:
+    def __init__(self, player_0, player_1, exp_file='../sample_experiment/test_exp.txt', execute_file='../bin/SparCraft'):
+        self.player_0 = player_0
+        self.player_1 = player_1
+        self.exp_file = exp_file
+        self.num_exp = 0
+        self.winner = [0]*3  # player 0 | player 1 | draw
+        self.execute_file = execute_file
+        self.process = Popen([self.execute_file, self.exp_file], stdin=PIPE, stdout=PIPE)
+        self.state = GameState()
 
-    '''
-    return process.stdout.readline().decode('utf-8').replace('\n', '').replace('\r', '').split(split)
+        # self.player_0.set_id(0)
+        # self.player_1.set_id(1)
 
+    def processMessage(self, split=' ') -> list:
+        '''
+        @description: convert bytes into string and split it into list
+        @param {Popen} process: the process of sparcraft
+        @param {string} split: the split flag
+        @return {list}: the list of the string
 
-def processGameState(process: Popen, game: GameState) -> None:
-    message = processMessage(process)
+        '''
+        return self.process.stdout.readline().decode('utf-8').replace('\n', '').replace('\r', '').split(split)
 
-    while message[0] != "End":
-        if message[0] == "Time":
-            try:
-                game.setTime(int(message[1]))
-            except Exception as e:
-                print(e)
-        elif message[0] == "Unit":
-            try:
-                # get the infomation
-                player = int(message[1])
-                hp = int(message[2])
-                firstTimeFree = int(message[3])
-                position = [int(message[4]), int(message[5])]
-                range = int(message[6])
-                damage = int(message[7])
-                dpf = float(message[8])
-                # set up the unit
-                unit = Unit(position, hp, range, damage, dpf)
-                # add unit to game state
+    def processGameState(self,  state: GameState) -> None:
+        message = self.processMessage()
 
-                if player == game.player_id:
-                    game.addUnit(unit)
-                else:
-                    game.addEnemy(unit)
-            except Exception as e:
-                print("Error:", ' '.join(message))
-                print(e)
-        elif message[0] == "Move":
-            try:
-                unitIndex = int(message[1])
-                player = int(message[2])
-                moveType = int(message[3])
-                moveIndex = int(message[4])
-                position_x = int(message[5])
-                position_y = int(message[6])
+        while message[0] != "End":
+            if message[0] == "Time":
+                try:
+                    state.setTime(int(message[1]))
+                except Exception as e:
+                    print(e)
+            elif message[0] == "Unit":
+                try:
+                    # get the infomation
+                    player = int(message[1])
+                    hp = int(message[2])
+                    firstTimeFree = int(message[3])
+                    position = [int(message[4]), int(message[5])]
+                    range = int(message[6])
+                    damage = int(message[7])
+                    dpf = float(message[8])
+                    # set up the unit
+                    unit = Unit(position, hp, range, damage, dpf)
+                    # add unit to game state
 
-                # set up the move
-                game.player_unit[unitIndex].moves.append([moveType, moveIndex, position_x, position_y])
+                    if player == state.player_id:
+                        state.addUnit(unit)
+                    else:
+                        state.addEnemy(unit)
+                except Exception as e:
+                    print("Error:", ' '.join(message))
+                    print(e)
+            elif message[0] == "Move":
+                try:
+                    unitIndex = int(message[1])
+                    player = int(message[2])
 
-            except Exception as e:
-                print("Error:", ' '.join(message))
-                print(e)
-        else:
-            print("Unknown:", ' '.join(message))
-            raise Exception
-        message = processMessage(process)
-    # return game
+                    moveType = int(message[3])
+                    moveIndex = int(message[4])
+                    position_x = int(message[5])
+                    position_y = int(message[6])
 
+                    # set up the move
+                    state.player_unit[unitIndex].moves.append([moveType, moveIndex, position_x, position_y])
 
-def returnMoves(process: Popen, decision: list) -> None:
-    '''
-    @description: return the move string to sparcraft
-    @param {Popen} process: the process of sparcraft
-    @param {list} decision: the move list (int)
-    @return {*}
-    '''
-
-    moveString = ' '.join(str(i) for i in decision)+'\n'
-    process.stdin.write(str.encode(moveString))
-    process.stdin.flush()
-
-
-if __name__ == '__main__':
-    # open Sparcraft as subprocess
-    experiment_file = '../sample_experiment/test_exp.txt'
-    process = Popen([SPARCRAFT, experiment_file], stdin=PIPE, stdout=PIPE)
-    message = processMessage(process)
-
-    # Check program started
-    # Start Message: "Adding 10 State(s)"
-    if message[0] == 'Adding':
-        print("Sub process successfully start")
-
-    # get amount of experiment
-    num_exp = int(message[1])
-    winner = [0]*3  # player 0 | player 1 | draw
-
-    game = GameState()
-    # player = RandomPlayer()
-
-    playerZero = NOKDPS(0)
-    playerOne = AttackWeakest(1)
-
-    for i in range(num_exp):
-        isRoundEnd = False
-        while not isRoundEnd:
-            # three occasions:
-            # 1.gamestate infomation
-            # 2.win
-            # 3.draw
-            message = processMessage(process)
-            if message[0] == "Begin":
-                # the game is still in progressing, we need to keep it
-                player_message = processMessage(process)
-                assert player_message[0] == "PlayerID"
-                game.player_id = int(player_message[1])
-                processGameState(process, game)
-                # FIXME: still need to improve here
-                if game.player_id == 0:
-                    decision = playerZero.generate(game)
-                else:
-                    decision = playerOne.generate(game)
-                # print(decision)
-                # Return the move to sparcraft
-                returnMoves(process, decision)
-            elif message[0] == "Winner":
-                # the game finish and clear the game infomation
-                winner[int(message[-1])] += 1
-                isRoundEnd = True
-                print("Winner: Player", int(message[-1]))
-            elif message[0] == "Draw":
-                # the game finish and clear the game infomation
-                winner[-1] += 1
-                isRoundEnd = True
-                print("Draw")
+                except Exception as e:
+                    print("Error:", ' '.join(message))
+                    print(e)
             else:
-                print("Error: ", ' '.join(message))
+                print("Unknown:", ' '.join(message))
                 raise Exception
-            game.clear()
+            message = self.processMessage(self.process)
+        # return game
 
-    # result of experiment
-    print("Player 0:", winner[0], "\nPlayer 1:", winner[1], "\nDraw:", winner[2])
+    def returnMoves(self,  decision: list) -> None:
+        '''
+        @description: return the move string to sparcraft
+        @param {Popen} process: the process of sparcraft
+        @param {list} decision: the move list (int)
+        @return {*}
+        '''
+
+        moveString = ' '.join(str(i) for i in decision)+'\n'
+        self.process.stdin.write(str.encode(moveString))
+        self.process.stdin.flush()
+
+    def init_experiment(self):
+        message = self.processMessage(self.process)
+        # Check program started
+        # Start Message: "Adding 10 State(s)"
+        if message[0] == 'Adding':
+            print("Sub process successfully start")
+        # get amount of experiment
+        self.num_exp = int(message[1])
+
+    def run_experiment(self):
+        for i in range(self.num_exp):
+            end = False
+            while not end:
+                end = self.run_round()
+                self.state.clear()
+
+    def run_round(self):
+        # three occasions:
+        # 1.gamestate infomation
+        # 2.win
+        # 3.draw
+        message = self.processMessage()
+        if message[0] == "Begin":
+            # the game is still in progressing, we need to keep it
+            player_message = self.processMessage()
+            assert player_message[0] == "PlayerID"
+            self.state.player_id = int(player_message[1])
+            self.processGameState(self.state)
+            if self.state.player_id == 0:
+                decision = self.player_0.generate(self.state)
+            else:
+                decision = self.player_1.generate(self.state)
+            # print(decision)
+            # Return the move to sparcraft
+            self.returnMoves(decision)
+            return False
+
+        elif message[0] == "Winner":
+            # the game finish and clear the game infomation
+            self.winner[int(message[-1])] += 1
+            print("Winner: Player", int(message[-1]))
+            return True
+
+        elif message[0] == "Draw":
+            # the game finish and clear the game infomation
+            self.winner[-1] += 1
+            print("Draw")
+            return True
+
+        else:
+            print("Error: ", ' '.join(message))
+            raise Exception
+        return True
+
+    def get_result(self) -> list:
+        return self.winner
+
+    def print_result(self) -> None:
+        # result of experiment
+        print("Player 0:", self.winner[0], "\nPlayer 1:", self.winner[1], "\nDraw:", self.winner[2])
+
+    def clear(self):
+        pass

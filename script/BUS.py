@@ -1,11 +1,15 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 16:30:54
-LastEditTime: 2021-07-05 19:43:00
+LastEditTime: 2021-07-15 19:50:55
 LastEditors: Ethan Chen
 Description: Buttom up search for sparcraft
 FilePath: \Sparcraft\script\BUS.py
 '''
+
+from Constant import ATTACK, MOVE, RELOAD
+from GameState import GameState, Unit
+from DSL import *
 
 
 class ProgramList():
@@ -23,9 +27,6 @@ class ProgramList():
         self.plist[program.get_size()][program.class_name()].append(program)
         self.number_program += 1
 
-    def init_plist(self):
-        pass
-
     def get_programs(self, size):
         if size in self.plist:
             return self.plist[size]
@@ -36,8 +37,101 @@ class ProgramList():
 
 
 class ButtomUpSearch():
-    def __init__(self):
-        pass
+
+    def __init__(self, log_file, program_file, log_results=True):
+        self.log_results = log_results
+
+        if self.log_results:
+            self.log_folder = 'logs/'
+            self.program_folder = 'programs/'
+
+            self.log_file = 'bus-' + log_file
+            self.program_file = 'bus-' + program_file
+
+    def generate_initial_set_of_programs(self, numeric_constant_values,
+                                         string_constant_values,
+                                         variables_scalar,
+                                         variables_list,
+                                         variables_scalar_from_array,
+                                         functions_scalars):
+        set_of_initial_programs = []
+
+        for i in variables_scalar:
+            p = VarScalar.new(i)
+
+            if self.detect_equivalence and self.has_equivalent(p):
+                continue
+
+            set_of_initial_programs.append(p)
+
+        for i in variables_scalar_from_array:
+            p = VarScalarFromArray.new(i)
+
+            if self.detect_equivalence and self.has_equivalent(p):
+                continue
+
+            set_of_initial_programs.append(p)
+
+        for i in variables_list:
+            p = VarList.new(i)
+
+            if self.detect_equivalence and self.has_equivalent(p):
+                continue
+
+            set_of_initial_programs.append(p)
+
+        for i in numeric_constant_values:
+            constant = NumericConstant.new(i)
+
+            if self.detect_equivalence and self.has_equivalent(constant):
+                continue
+
+            set_of_initial_programs.append(constant)
+
+        for i in string_constant_values:
+            constant = StringConstant.new(i)
+
+            if self.detect_equivalence and self.has_equivalent(constant):
+                continue
+
+            set_of_initial_programs.append(constant)
+
+        for i in functions_scalars:
+            p = i()
+
+            if self.detect_equivalence and self.has_equivalent(p):
+                continue
+
+            set_of_initial_programs.append(p)
+
+        return set_of_initial_programs
+
+    def init_env(self, unit_state: Unit, game_state: GameState):
+        enemy = game_state.getEnemyFromUnit(unit_state)
+
+        env = {}
+        env['game_state'] = game_state
+        env['unit_state'] = unit_state
+        env['attack_actions'] = unit_state.getActionsByType(ATTACK)
+        env['move_actions'] = unit_state.getActionsByType(MOVE)
+        env['reload_actions'] = unit_state.getActionsByType(RELOAD)
+
+        env['num_attacks'] = len(env['attack_actions'])
+        env['num_moves'] = len(env['move_actions'])
+        env['num_reload'] = len(env['reload_actions'])
+
+        # For move
+        env['moves_distance'] = unit_state.getMoveDistanceList()
+        # destination enemy that could attack
+
+        # For Attack
+        env['enemy_distance'] = game_state.getEnemyDistanceFromUnit(unit_state)
+        env['enemy_hp'] = [i.hp for i in enemy]
+        env['enemy_range'] = [i.range for i in enemy]
+        env['enemy_damage'] = [i.damage for i in enemy]
+        env['enemy_dpf'] = [i.dpf for i in enemy]
+
+        return env
 
     def grow(self, operations, size):
         new_programs = []
@@ -54,15 +148,69 @@ class ButtomUpSearch():
     def get_closed_list(self):
         return self.closed_list
 
-    def search(self, bound):
-        self.closed_list = set()
-        self.plist = ProgramList()
-        self.plist.init_plist()
+    def search(self,
+               bound,
+               operations,
+               numeric_constant_values,
+               string_constant_values,
+               variables_scalar,
+               variables_list,
+               variables_scalar_from_array,
+               functions_scalars,
+               eval_function,
+               use_triage,
+               collect_library=False):
 
+        NumericConstant.accepted_types = [set(numeric_constant_values)]
+        StringConstant.accepted_types = [set(string_constant_values)]
+        VarList.accepted_types = [set(variables_list)]
+        VarScalar.accepted_types = [set(variables_scalar)]
+        VarScalarFromArray.accepted_types = [set(variables_scalar_from_array)]
+
+        self.closed_list = set()
+        self.programs_outputs = set()
+
+        initial_set_of_programs = self.generate_initial_set_of_programs(numeric_constant_values,
+                                                                        string_constant_values,
+                                                                        variables_scalar,
+                                                                        variables_list,
+                                                                        variables_scalar_from_array,
+                                                                        functions_scalars)
+        self.plist = ProgramList()
+        for p in initial_set_of_programs:
+            self.plist.insert(p)
+
+        number_programs_evaluated = 0
+        number_games_played = 0
         current_size = 0
 
-        # while current_size <= bound:
-        # pass
-        # TODO: operations
-        # for p in self.grow(operations, current_size):
-        #     pass
+        best_winrate = 0.0
+        best_program = None
+
+        while current_size <= bound:
+
+            number_evaluations_bound = 0
+
+            for p in self.grow(operations, current_size):
+                number_programs_evaluated += 1
+                number_evaluations_bound += 1
+
+                if collect_library:
+                    score = 0
+                else:
+                    if use_triage:
+                        score, _, number_matches_played = eval_function.eval_triage(p, best_winrate)
+                    else:
+                        score, _, number_matches_played = eval_function.eval(p)
+                    number_games_played += number_matches_played
+
+                if best_program is None or score > best_winrate:
+                    best_winrate = score
+                    best_program = p
+
+            current_size += 1
+
+        if collect_library:
+            return self.plist.plist
+
+        return best_winrate, best_program, number_programs_evaluated, number_games_played

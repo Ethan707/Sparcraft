@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 15:34:52
-LastEditTime: 2021-07-13 22:02:30
+LastEditTime: 2021-07-15 20:08:16
 LastEditors: Ethan Chen
 Description: DSL for Sparcarft
 FilePath: \Sparcraft\script\DSL.py
@@ -60,6 +60,17 @@ class Node:
     def interpret(self):
         raise Exception('Unimplemented method: interpret')
 
+    def interpret_local_variables(self, env, x):
+        if self.local not in env:
+            env[self.local] = {}
+
+        if type(x).__name__ == self.tuplename:
+            x = list(x)
+
+        env[self.local][type(x).__name__] = x
+
+        return self.interpret(env)
+
     @classmethod
     def grow(plist):
         pass
@@ -67,31 +78,6 @@ class Node:
     @classmethod
     def class_name(cls):
         return cls.__name__
-
-
-class Constant(Node):
-
-    def __init__(self):
-        super(Constant, self).__init__()
-        self.max_limit = 1
-        self.size = 0
-
-    @classmethod
-    def new(cls, var):
-        inst = cls()
-        inst.add_child(var)
-        return inst
-
-    def to_string(self):
-        if len(self.children) == 0:
-            raise Exception('Constant: Incomplete Program')
-
-        return str(self.children[0])
-
-    def interpret(self, env):
-        if len(self.children) == 0:
-            raise Exception('Constant: Incomplete Program')
-        return self.children[0]
 
 
 class Times(Node):
@@ -410,7 +396,6 @@ class ITE(Node):
 
     @classmethod
     def new(cls, if_arg, then_arg, else_arg):
-        # TODO:assert the if arg
         inst = cls()
         inst.add_child(if_arg)
         inst.add_child(then_arg)
@@ -652,31 +637,6 @@ class VarList(Node):
         return env[self.children[0]]
 
 
-class AssignActionToReturn(Node):
-    def __init__(self):
-        super(AssignActionToReturn, self).__init__()
-        self.number_children = 1
-
-    @classmethod
-    def new(cls, var):
-        inst = cls()
-        inst.add_child(var)
-
-        return inst
-
-    def to_string(self):
-        if len(self.children) == 0:
-            raise Exception('AssignActionToReturn: Incomplete Program')
-
-        return 'action_to_return = actions[' + self.children[0].to_string() + ']'
-
-    def interpret(self, env):
-        if len(self.children) == 0:
-            raise Exception('AssignActionToReturn: Incomplete Program')
-
-        env['action_to_return'] = env['actions'][self.children[0].interpret(env)]
-
-
 class And(Node):
     def __init__(self):
         super(And, self).__init__()
@@ -862,7 +822,6 @@ class Map(Node):
         return 'map(' + self.children[0].to_string() + ", " + self.children[1].to_string() + ")"
 
     def interpret(self, env):
-        # TODO: modify
         # if list is None, then it tries to retrieve from local variables from a lambda function
         if self.children[1] is None:
             list_var = env[self.local][self.listname]
@@ -889,5 +848,109 @@ class Function(Node):
     def interpret(self, env):
         return lambda x: self.children[0].interpret_local_variables(env, x)
 
-# TODO:
-# len
+
+class StringConstant(Node):
+
+    def __init__(self):
+        super(StringConstant, self).__init__()
+        self.number_children = 1
+        self.size = 0
+
+    @classmethod
+    def new(cls, var):
+        inst = cls()
+        inst.add_child(var)
+
+        return inst
+
+    def to_string(self):
+        if len(self.children) == 0:
+            raise Exception('VarScalar: Incomplete Program')
+
+        return str(self.children[0])
+
+    def interpret(self, env):
+        if len(self.children) == 0:
+            raise Exception('VarScalar: Incomplete Program')
+
+        return self.children[0]
+
+
+class NumericConstant(Node):
+
+    def __init__(self):
+        super(NumericConstant, self).__init__()
+        self.number_children = 1
+        self.size = 0
+
+    @classmethod
+    def new(cls, var):
+        inst = cls()
+        inst.add_child(var)
+
+        return inst
+
+    def to_string(self):
+        if len(self.children) == 0:
+            raise Exception('VarScalar: Incomplete Program')
+
+        return str(self.children[0])
+
+    def interpret(self, env):
+        if len(self.children) == 0:
+            raise Exception('VarScalar: Incomplete Program')
+
+        return self.children[0]
+
+
+class VarScalar(Node):
+
+    def __init__(self):
+        super(VarScalar, self).__init__()
+        self.number_children = 1
+        self.size = 0
+
+    @classmethod
+    def new(cls, var):
+        inst = cls()
+        inst.add_child(var)
+
+        return inst
+
+    def to_string(self):
+        if len(self.children) == 0:
+            raise Exception('VarScalar: Incomplete Program')
+
+        return self.children[0]
+
+    def interpret(self, env):
+        if len(self.children) == 0:
+            raise Exception('VarScalar: Incomplete Program')
+
+        return env[self.children[0]]
+
+
+class VarScalarFromArray(Node):
+    def __init__(self):
+        super(VarScalarFromArray, self).__init__()
+        self.number_children = 1
+        self.size = 0
+
+    @classmethod
+    def new(cls, var):
+        inst = cls()
+        inst.add_child(var)
+
+        return inst
+
+    def to_string(self):
+        if len(self.children) == 0:
+            raise Exception('VarScalarFromArray: Incomplete Program')
+
+        return self.children[0]
+
+    def interpret(self, env):
+        if len(self.children) == 0:
+            raise Exception('VarScalarFromArray: Incomplete Program')
+
+        return env[self.children[0]][env[self.local][self.intname]]
