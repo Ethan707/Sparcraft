@@ -2,27 +2,25 @@
 
 using namespace SparCraft;
 
-SearchExperiment::SearchExperiment(const std::string &configFile)
-    : map(NULL), showDisplay(false), appendTimeStamp(true), rand(0, std::numeric_limits<int>::max(), 0)
-{
+SearchExperiment::SearchExperiment(const std::string &configFile,
+                                   const std::string &num)
+    : map(NULL), showDisplay(false), appendTimeStamp(true),
+      rand(0, std::numeric_limits<int>::max(), 0) {
     configFileSmall = getBaseFilename(configFile);
     map = new Map(40, 22);
     setCurrentDateTime();
-    parseConfigFile(configFile);
+    parseConfigFile(configFile, num);
     writeConfig(configFile);
     setupResults();
 }
 
-SearchExperiment::~SearchExperiment()
-{
-    if (map)
-    {
+SearchExperiment::~SearchExperiment() {
+    if (map) {
         delete map;
     }
 }
 
-void SearchExperiment::setupResults()
-{
+void SearchExperiment::setupResults() {
     size_t np1 = players[0].size();
     size_t np2 = players[1].size();
 
@@ -37,43 +35,38 @@ void SearchExperiment::setupResults()
     numDraws = ivv(np1, iv(np2, 0));
 }
 
-void SearchExperiment::writeConfig(const std::string &configfile)
-{
+void SearchExperiment::writeConfig(const std::string &configfile) {
     std::ofstream config(getConfigOutFileName().c_str());
-    if (!config.is_open())
-    {
+    if (!config.is_open()) {
         System::FatalError("Problem Opening Output File: Config");
     }
 
     std::vector<std::string> lines(getLines(configfile));
 
-    for (size_t l(0); l < lines.size(); ++l)
-    {
+    for (size_t l(0); l < lines.size(); ++l) {
         config << lines[l] << std::endl;
     }
 
     config.close();
 }
 
-void SearchExperiment::writeResultsSummary()
-{
+void SearchExperiment::writeResultsSummary() {
     std::ofstream results(getResultsSummaryFileName().c_str());
-    if (!results.is_open())
-    {
+    if (!results.is_open()) {
         System::FatalError("Problem Opening Output File: Results Summary");
     }
 
-    for (size_t p1(0); p1 < players[0].size(); ++p1)
-    {
-        for (size_t p2(0); p2 < players[1].size(); ++p2)
-        {
+    for (size_t p1(0); p1 < players[0].size(); ++p1) {
+        for (size_t p2(0); p2 < players[1].size(); ++p2) {
             double score = 0;
-            if (numGames[p1][p2] > 0)
-            {
-                score = ((double)numWins[p1][p2] / (double)(numGames[p1][p2])) + 0.5 * ((double)numDraws[p1][p2] / (double)numGames[p1][p2]);
+            if (numGames[p1][p2] > 0) {
+                score =
+                    ((double)numWins[p1][p2] / (double)(numGames[p1][p2])) +
+                    0.5 * ((double)numDraws[p1][p2] / (double)numGames[p1][p2]);
             }
 
-            results << std::setiosflags(std::ios::fixed) << std::setw(12) << std::setprecision(7) << score << " ";
+            results << std::setiosflags(std::ios::fixed) << std::setw(12)
+                    << std::setprecision(7) << score << " ";
         }
 
         results << std::endl;
@@ -82,20 +75,16 @@ void SearchExperiment::writeResultsSummary()
     results.close();
 }
 
-void SearchExperiment::padString(std::string &str, const size_t &length)
-{
-    while (str.length() < length)
-    {
+void SearchExperiment::padString(std::string &str, const size_t &length) {
+    while (str.length() < length) {
         str = str + " ";
     }
 }
 
-std::string SearchExperiment::getResultsSummaryFileName()
-{
+std::string SearchExperiment::getResultsSummaryFileName() {
     std::string res = resultsFile;
 
-    if (appendTimeStamp)
-    {
+    if (appendTimeStamp) {
         res += "_" + getDateTimeString();
     }
 
@@ -103,12 +92,10 @@ std::string SearchExperiment::getResultsSummaryFileName()
     return res;
 }
 
-std::string SearchExperiment::getResultsOutFileName()
-{
+std::string SearchExperiment::getResultsOutFileName() {
     std::string res = resultsFile;
 
-    if (appendTimeStamp)
-    {
+    if (appendTimeStamp) {
         res += "_" + getDateTimeString();
     }
 
@@ -116,12 +103,10 @@ std::string SearchExperiment::getResultsOutFileName()
     return res;
 }
 
-std::string SearchExperiment::getConfigOutFileName()
-{
+std::string SearchExperiment::getConfigOutFileName() {
     std::string conf = resultsFile;
 
-    if (appendTimeStamp)
-    {
+    if (appendTimeStamp) {
         conf += "_" + getDateTimeString();
     }
 
@@ -129,13 +114,9 @@ std::string SearchExperiment::getConfigOutFileName()
     return conf;
 }
 
-std::string SearchExperiment::getDateTimeString()
-{
-    return timeString;
-}
+std::string SearchExperiment::getDateTimeString() { return timeString; }
 
-void SearchExperiment::setCurrentDateTime()
-{
+void SearchExperiment::setCurrentDateTime() {
     time_t now = time(0);
     struct tm tstruct;
     char buf[80];
@@ -143,13 +124,11 @@ void SearchExperiment::setCurrentDateTime()
     std::fill(buf, buf + 80, '0');
     tstruct = *localtime(&now);
     strftime(buf, sizeof(buf), "%Y-%m-%d_%X", &tstruct);
-    //strftime(buf, sizeof(buf), "%X", &tstruct);
+    // strftime(buf, sizeof(buf), "%X", &tstruct);
 
     // need to replace ':' for windows filenames
-    for (int i(0); i < 80; i++)
-    {
-        if (buf[i] == ':')
-        {
+    for (int i(0); i < 80; i++) {
+        if (buf[i] == ':') {
             buf[i] = '-';
         }
     }
@@ -157,12 +136,11 @@ void SearchExperiment::setCurrentDateTime()
     timeString = std::string(buf);
 }
 
-std::vector<std::string> SearchExperiment::getLines(const std::string &filename)
-{
+std::vector<std::string>
+SearchExperiment::getLines(const std::string &filename) {
     // set up the file
     std::ifstream fin(filename.c_str());
-    if (!fin.is_open())
-    {
+    if (!fin.is_open()) {
         System::FatalError("Problem Opening File: " + filename);
     }
 
@@ -171,14 +149,12 @@ std::vector<std::string> SearchExperiment::getLines(const std::string &filename)
     std::vector<std::string> lines;
 
     // each line of the file will be a new player to add
-    while (fin.good())
-    {
+    while (fin.good()) {
         // get the line and set up the string stream
         getline(fin, line);
 
         // skip blank lines and comments
-        if (line.length() > 1 && line[0] != '#')
-        {
+        if (line.length() > 1 && line[0] != '#') {
             lines.push_back(line);
         }
     }
@@ -188,53 +164,41 @@ std::vector<std::string> SearchExperiment::getLines(const std::string &filename)
     return lines;
 }
 
-void SearchExperiment::parseConfigFile(const std::string &filename)
-{
+void SearchExperiment::parseConfigFile(const std::string &filename,
+                                       const std::string &num) {
     std::vector<std::string> lines(getLines(filename));
 
-    for (size_t l(0); l < lines.size(); ++l)
-    {
+    for (size_t l(0); l < lines.size(); ++l) {
         std::istringstream iss(lines[l]);
         std::string option;
         iss >> option;
 
-        if (strcmp(option.c_str(), "Player") == 0)
-        {
+        if (strcmp(option.c_str(), "Player") == 0) {
             addPlayer(lines[l]);
-        }
-        else if (strcmp(option.c_str(), "State") == 0)
-        {
-            addState(lines[l]);
-        }
-        else if (strcmp(option.c_str(), "MapFile") == 0)
-        {
+        } else if (strcmp(option.c_str(), "State") == 0) {
+            addState(lines[l], num);
+        } else if (strcmp(option.c_str(), "MapFile") == 0) {
             std::string fileString;
             iss >> fileString;
             map = new Map;
             map->load(fileString);
-        }
-        else if (strcmp(option.c_str(), "Display") == 0)
-        {
+        } else if (strcmp(option.c_str(), "Display") == 0) {
             std::string option;
             iss >> option;
             iss >> imageDir;
-            if (strcmp(option.c_str(), "true") == 0)
-            {
+            if (strcmp(option.c_str(), "true") == 0) {
                 showDisplay = true;
             }
-        }
-        else if (strcmp(option.c_str(), "ResultsFile") == 0)
-        {
+        } else if (strcmp(option.c_str(), "ResultsFile") == 0) {
             std::string fileString;
             std::string append;
             iss >> fileString;
             iss >> append;
             resultsFile = fileString;
 
-            appendTimeStamp = strcmp(append.c_str(), "true") == 0 ? true : false;
-        }
-        else if (strcmp(option.c_str(), "PlayerUpgrade") == 0)
-        {
+            appendTimeStamp =
+                strcmp(append.c_str(), "true") == 0 ? true : false;
+        } else if (strcmp(option.c_str(), "PlayerUpgrade") == 0) {
             int playerID(0);
             std::string upgradeName;
             int upgradeLevel(0);
@@ -243,56 +207,51 @@ void SearchExperiment::parseConfigFile(const std::string &filename)
             iss >> upgradeName;
             iss >> upgradeLevel;
 
-            for (const BWAPI::UpgradeType &type : BWAPI::UpgradeTypes::allUpgradeTypes())
-            {
-                if (type.getName().compare(upgradeName) == 0)
-                {
-                    PlayerProperties::Get(playerID).SetUpgradeLevel(type, upgradeLevel);
+            for (const BWAPI::UpgradeType &type :
+                 BWAPI::UpgradeTypes::allUpgradeTypes()) {
+                if (type.getName().compare(upgradeName) == 0) {
+                    PlayerProperties::Get(playerID).SetUpgradeLevel(
+                        type, upgradeLevel);
                     break;
                 }
             }
-        }
-        else if (strcmp(option.c_str(), "PlayerTech") == 0)
-        {
+        } else if (strcmp(option.c_str(), "PlayerTech") == 0) {
             int playerID(0);
             std::string techName;
 
             iss >> playerID;
             iss >> techName;
 
-            for (const BWAPI::TechType &type : BWAPI::TechTypes::allTechTypes())
-            {
-                if (type.getName().compare(techName) == 0)
-                {
+            for (const BWAPI::TechType &type :
+                 BWAPI::TechTypes::allTechTypes()) {
+                if (type.getName().compare(techName) == 0) {
                     PlayerProperties::Get(playerID).SetResearched(type, true);
                     break;
                 }
             }
-        }
-        else
-        {
-            System::FatalError("Invalid Option in Configuration File: " + option);
+        } else {
+            System::FatalError("Invalid Option in Configuration File: " +
+                               option);
         }
     }
 }
 
-void SearchExperiment::addState(const std::string &line)
-{
+void SearchExperiment::addState(const std::string &line,
+                                const std::string &num) {
     std::istringstream iss(line);
 
     // the first number is the playerID
     std::string state;
     std::string stateType;
-    int numStates;
+    int numStates = std::stoi(num);
 
     iss >> state;
     iss >> stateType;
-    iss >> numStates;
+    // iss >> numStates;
 
     std::cout << "Adding " << numStates << " State(s)" << endl;
 
-    if (strcmp(stateType.c_str(), "StateSymmetric") == 0)
-    {
+    if (strcmp(stateType.c_str(), "StateSymmetric") == 0) {
         int xLimit, yLimit;
         iss >> xLimit;
         iss >> yLimit;
@@ -302,42 +261,34 @@ void SearchExperiment::addState(const std::string &line)
         std::string unitType;
         int numUnits;
 
-        while (iss >> unitType)
-        {
+        while (iss >> unitType) {
             iss >> numUnits;
             unitVec.push_back(unitType);
             numUnitVec.push_back(numUnits);
         }
 
-        //   std::cout << "\nAdding " << numStates <<  " Symmetric State(s)\n\n";
+        //   std::cout << "\nAdding " << numStates <<  " Symmetric
+        //   State(s)\n\n";
 
-        for (int s(0); s < numStates; ++s)
-        {
-            states.push_back(getSymmetricState(unitVec, numUnitVec, xLimit, yLimit));
+        for (int s(0); s < numStates; ++s) {
+            states.push_back(
+                getSymmetricState(unitVec, numUnitVec, xLimit, yLimit));
         }
-    }
-    else if (strcmp(stateType.c_str(), "StateRawDataFile") == 0)
-    {
+    } else if (strcmp(stateType.c_str(), "StateRawDataFile") == 0) {
         std::string filename;
         iss >> filename;
 
-        for (int i(0); i < numStates; ++i)
-        {
+        for (int i(0); i < numStates; ++i) {
             states.push_back(GameState(filename));
         }
-    }
-    else if (strcmp(stateType.c_str(), "StateDescriptionFile") == 0)
-    {
+    } else if (strcmp(stateType.c_str(), "StateDescriptionFile") == 0) {
         std::string filename;
         iss >> filename;
 
-        for (int i(0); i < numStates; ++i)
-        {
+        for (int i(0); i < numStates; ++i) {
             parseStateDescriptionFile(filename);
         }
-    }
-    else if (strcmp(stateType.c_str(), "SeparatedState") == 0)
-    {
+    } else if (strcmp(stateType.c_str(), "SeparatedState") == 0) {
         int xLimit, yLimit;
         int cx1, cy1, cx2, cy2;
         iss >> xLimit;
@@ -352,22 +303,19 @@ void SearchExperiment::addState(const std::string &line)
         std::string unitType;
         int numUnits;
 
-        while (iss >> unitType)
-        {
+        while (iss >> unitType) {
             iss >> numUnits;
             unitVec.push_back(unitType);
             numUnitVec.push_back(numUnits);
         }
 
-        //std::cout << "\nAdding " << numStates <<  " Symmetric State(s)\n\n";
+        // std::cout << "\nAdding " << numStates <<  " Symmetric State(s)\n\n";
 
-        for (int s(0); s < numStates / 2; ++s)
-        {
-            addSeparatedState(unitVec, numUnitVec, cx1, cy1, cx2, cy2, xLimit, yLimit);
+        for (int s(0); s < numStates / 2; ++s) {
+            addSeparatedState(unitVec, numUnitVec, cx1, cy1, cx2, cy2, xLimit,
+                              yLimit);
         }
-    }
-    else if (strcmp(stateType.c_str(), "StateSymmetricVerticalLine") == 0)
-    {
+    } else if (strcmp(stateType.c_str(), "StateSymmetricVerticalLine") == 0) {
         int xLimit, yLimit;
         iss >> xLimit;
         iss >> yLimit;
@@ -377,34 +325,30 @@ void SearchExperiment::addState(const std::string &line)
         std::string unitType;
         int numUnits;
 
-        while (iss >> unitType)
-        {
+        while (iss >> unitType) {
             iss >> numUnits;
             unitVec.push_back(unitType);
             numUnitVec.push_back(numUnits);
         }
 
-        //std::cout << "\nAdding " << numStates <<  " Symmetric State(s)\n\n";
+        // std::cout << "\nAdding " << numStates <<  " Symmetric State(s)\n\n";
 
-        for (int s(0); s < numStates; ++s)
-        {
-            states.push_back(getSymmetricVerticalLineState(unitVec, numUnitVec, xLimit, yLimit));
+        for (int s(0); s < numStates; ++s) {
+            states.push_back(getSymmetricVerticalLineState(unitVec, numUnitVec,
+                                                           xLimit, yLimit));
         }
-    }
-    else
-    {
-        System::FatalError("Invalid State Type in Configuration File: " + stateType);
+    } else {
+        System::FatalError("Invalid State Type in Configuration File: " +
+                           stateType);
     }
 }
 
-void SearchExperiment::parseStateDescriptionFile(const std::string &fileName)
-{
+void SearchExperiment::parseStateDescriptionFile(const std::string &fileName) {
     std::vector<std::string> lines = getLines(fileName);
 
     GameState currentState;
 
-    for (size_t u(0); u < lines.size(); ++u)
-    {
+    for (size_t u(0); u < lines.size(); ++u) {
         std::stringstream iss(lines[u]);
         std::string unitType;
         int playerID(0);
@@ -416,20 +360,19 @@ void SearchExperiment::parseStateDescriptionFile(const std::string &fileName)
         iss >> x;
         iss >> y;
 
-        currentState.addUnit(getUnitType(unitType), (IDType)playerID, Position(x, y));
+        currentState.addUnit(getUnitType(unitType), (IDType)playerID,
+                             Position(x, y));
     }
 
     states.push_back(currentState);
 }
 
-BWAPI::UnitType SearchExperiment::getUnitType(const std::string &unitTypeString)
-{
+BWAPI::UnitType
+SearchExperiment::getUnitType(const std::string &unitTypeString) {
     BWAPI::UnitType type;
 
-    for (const BWAPI::UnitType &t : BWAPI::UnitTypes::allUnitTypes())
-    {
-        if (t.getName().compare(unitTypeString) == 0)
-        {
+    for (const BWAPI::UnitType &t : BWAPI::UnitTypes::allUnitTypes()) {
+        if (t.getName().compare(unitTypeString) == 0) {
             type = t;
         }
     }
@@ -439,23 +382,26 @@ BWAPI::UnitType SearchExperiment::getUnitType(const std::string &unitTypeString)
     return type;
 }
 
-void SearchExperiment::addGameState(const GameState &state)
-{
-    if (states.size() >= 10000)
-    {
-        System::FatalError("Search Experiment cannot contain more than 10,000 states.");
+void SearchExperiment::addGameState(const GameState &state) {
+    if (states.size() >= 10000) {
+        System::FatalError(
+            "Search Experiment cannot contain more than 10,000 states.");
     }
 }
 
-void SearchExperiment::addPlayer(const std::string &line)
-{
+void SearchExperiment::addPlayer(const std::string &line) {
     std::istringstream iss(line);
 
     // Regular expressions for line validation (if I ever want to use them)
-    //std::regex ScriptRegex("[a-zA-Z]+[ ]+[0-1][ ]+[a-zA-Z]+[ ]*");
-    //std::regex AlphaBetaRegex("[a-zA-Z]+[ ]+[0-1][ ]+[a-zA-Z]+[ ]+[0-9]+[ ]+[0-9]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]*");
-    //std::regex UCTRegex("[a-zA-Z]+[ ]+[0-1][ ]+[a-zA-Z]+[ ]+[0-9]+[ ]+[0-9.]+[ ]+[0-9]+[ ]+[0-9]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]*");
-    //std::regex PortfolioRegex("[a-zA-Z]+[ ]+[0-1][ ]+[a-zA-Z]+[ ]+[0-9]+[ ]+[a-zA-Z]+[ ]+[0-9]+[ ][0-9]+[ ]*");
+    // std::regex ScriptRegex("[a-zA-Z]+[ ]+[0-1][ ]+[a-zA-Z]+[ ]*");
+    // std::regex AlphaBetaRegex("[a-zA-Z]+[ ]+[0-1][ ]+[a-zA-Z]+[ ]+[0-9]+[
+    // ]+[0-9]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[
+    // ]+[a-zA-Z]+[
+    // ]+[a-zA-Z]+[ ]*"); std::regex UCTRegex("[a-zA-Z]+[ ]+[0-1][ ]+[a-zA-Z]+[
+    // ]+[0-9]+[ ]+[0-9.]+[ ]+[0-9]+[ ]+[0-9]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[
+    // ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]+[a-zA-Z]+[ ]*"); std::regex
+    // PortfolioRegex("[a-zA-Z]+[ ]+[0-1][ ]+[a-zA-Z]+[ ]+[0-9]+[ ]+[a-zA-Z]+[
+    // ]+[0-9]+[ ][0-9]+[ ]*");
 
     // the first number is the playerID
 
@@ -472,50 +418,33 @@ void SearchExperiment::addPlayer(const std::string &line)
 
     playerModelID = PlayerModels::getID(playerModelString);
 
-    //std::cout << "Player " << playerID << " adding type " << playerModelString << " (" << playerModelID << ")" << std::endl;
+    // std::cout << "Player " << playerID << " adding type " <<
+    // playerModelString << " (" << playerModelID << ")" << std::endl;
 
-    if (playerModelID == PlayerModels::AttackClosest)
-    {
-        players[playerID].push_back(PlayerPtr(new Player_AttackClosest(playerID)));
-    }
-    else if (playerModelID == PlayerModels::AttackDPS)
-    {
+    if (playerModelID == PlayerModels::AttackClosest) {
+        players[playerID].push_back(
+            PlayerPtr(new Player_AttackClosest(playerID)));
+    } else if (playerModelID == PlayerModels::AttackDPS) {
         players[playerID].push_back(PlayerPtr(new Player_AttackDPS(playerID)));
-    }
-    else if (playerModelID == PlayerModels::Python)
-    {
+    } else if (playerModelID == PlayerModels::Python) {
         players[playerID].push_back(PlayerPtr(new Player_Python(playerID)));
-    }
-    else if (playerModelID == PlayerModels::AttackWeakest)
-    {
-        players[playerID].push_back(PlayerPtr(new Player_AttackWeakest(playerID)));
-    }
-    else if (playerModelID == PlayerModels::Kiter)
-    {
+    } else if (playerModelID == PlayerModels::AttackWeakest) {
+        players[playerID].push_back(
+            PlayerPtr(new Player_AttackWeakest(playerID)));
+    } else if (playerModelID == PlayerModels::Kiter) {
         players[playerID].push_back(PlayerPtr(new Player_Kiter(playerID)));
-    }
-    else if (playerModelID == PlayerModels::KiterDPS)
-    {
+    } else if (playerModelID == PlayerModels::KiterDPS) {
         players[playerID].push_back(PlayerPtr(new Player_KiterDPS(playerID)));
-    }
-    else if (playerModelID == PlayerModels::Kiter_NOKDPS)
-    {
-        players[playerID].push_back(PlayerPtr(new Player_Kiter_NOKDPS(playerID)));
-    }
-    else if (playerModelID == PlayerModels::Cluster)
-    {
+    } else if (playerModelID == PlayerModels::Kiter_NOKDPS) {
+        players[playerID].push_back(
+            PlayerPtr(new Player_Kiter_NOKDPS(playerID)));
+    } else if (playerModelID == PlayerModels::Cluster) {
         players[playerID].push_back(PlayerPtr(new Player_Cluster(playerID)));
-    }
-    else if (playerModelID == PlayerModels::NOKDPS)
-    {
+    } else if (playerModelID == PlayerModels::NOKDPS) {
         players[playerID].push_back(PlayerPtr(new Player_NOKDPS(playerID)));
-    }
-    else if (playerModelID == PlayerModels::Random)
-    {
+    } else if (playerModelID == PlayerModels::Random) {
         players[playerID].push_back(PlayerPtr(new Player_Random(playerID)));
-    }
-    else if (playerModelID == PlayerModels::ImprovedPortfolioGreedySearch)
-    {
+    } else if (playerModelID == PlayerModels::ImprovedPortfolioGreedySearch) {
         std::string enemyPlayerModel;
         size_t timeLimit(0);
         int iterations(1);
@@ -526,10 +455,11 @@ void SearchExperiment::addPlayer(const std::string &line)
         iss >> iterations;
         iss >> responses;
 
-        players[playerID].push_back(PlayerPtr(new Player_ImprovedPortfolioGreedySearch(playerID, PlayerModels::getID(enemyPlayerModel), iterations, responses, timeLimit)));
-    }
-    else if (playerModelID == PlayerModels::PortfolioOnlineEvolution)
-    {
+        players[playerID].push_back(
+            PlayerPtr(new Player_ImprovedPortfolioGreedySearch(
+                playerID, PlayerModels::getID(enemyPlayerModel), iterations,
+                responses, timeLimit)));
+    } else if (playerModelID == PlayerModels::PortfolioOnlineEvolution) {
         std::string enemyPlayerModel;
         size_t timeLimit(0);
         int iterations(1);
@@ -540,10 +470,11 @@ void SearchExperiment::addPlayer(const std::string &line)
         iss >> iterations;
         iss >> responses;
 
-        players[playerID].push_back(PlayerPtr(new Player_PortfolioOnlineEvolution(playerID, PlayerModels::getID(enemyPlayerModel), iterations, responses, timeLimit)));
-    }
-    else if (playerModelID == PlayerModels::PortfolioGreedySearch)
-    {
+        players[playerID].push_back(
+            PlayerPtr(new Player_PortfolioOnlineEvolution(
+                playerID, PlayerModels::getID(enemyPlayerModel), iterations,
+                responses, timeLimit)));
+    } else if (playerModelID == PlayerModels::PortfolioGreedySearch) {
         std::string enemyPlayerModel;
         size_t timeLimit(0);
         int iterations(1);
@@ -554,10 +485,10 @@ void SearchExperiment::addPlayer(const std::string &line)
         iss >> iterations;
         iss >> responses;
 
-        players[playerID].push_back(PlayerPtr(new Player_PortfolioGreedySearch(playerID, PlayerModels::getID(enemyPlayerModel), iterations, responses, timeLimit)));
-    }
-    else if (playerModelID == PlayerModels::IRStratifiedPolicySearch)
-    {
+        players[playerID].push_back(PlayerPtr(new Player_PortfolioGreedySearch(
+            playerID, PlayerModels::getID(enemyPlayerModel), iterations,
+            responses, timeLimit)));
+    } else if (playerModelID == PlayerModels::IRStratifiedPolicySearch) {
         std::string enemyPlayerModel;
         size_t timeLimit(0);
         int iterations(1);
@@ -568,10 +499,11 @@ void SearchExperiment::addPlayer(const std::string &line)
         iss >> iterations;
         iss >> responses;
 
-        players[playerID].push_back(PlayerPtr(new Player_IRStratifiedPolicySearch(playerID, PlayerModels::getID(enemyPlayerModel), iterations, responses, timeLimit)));
-    }
-    else if (playerModelID == PlayerModels::AdaptableStratifiedPolicySearch)
-    {
+        players[playerID].push_back(
+            PlayerPtr(new Player_IRStratifiedPolicySearch(
+                playerID, PlayerModels::getID(enemyPlayerModel), iterations,
+                responses, timeLimit)));
+    } else if (playerModelID == PlayerModels::AdaptableStratifiedPolicySearch) {
         std::string enemyPlayerModel;
         size_t timeLimit(0);
         int iterations(1);
@@ -582,10 +514,11 @@ void SearchExperiment::addPlayer(const std::string &line)
         iss >> iterations;
         iss >> responses;
 
-        players[playerID].push_back(PlayerPtr(new Player_AdaptableStratifiedPolicySearch(playerID, PlayerModels::getID(enemyPlayerModel), iterations, responses, timeLimit)));
-    }
-    else if (playerModelID == PlayerModels::StratifiedPolicySearch)
-    {
+        players[playerID].push_back(
+            PlayerPtr(new Player_AdaptableStratifiedPolicySearch(
+                playerID, PlayerModels::getID(enemyPlayerModel), iterations,
+                responses, timeLimit)));
+    } else if (playerModelID == PlayerModels::StratifiedPolicySearch) {
         std::string enemyPlayerModel;
         size_t timeLimit(0);
         size_t hpLevelDiv(1);
@@ -598,10 +531,10 @@ void SearchExperiment::addPlayer(const std::string &line)
         iss >> responses;
         iss >> hpLevelDiv;
 
-        players[playerID].push_back(PlayerPtr(new Player_StratifiedPolicySearch(playerID, PlayerModels::getID(enemyPlayerModel), iterations, responses, timeLimit, hpLevelDiv)));
-    }
-    else if (playerModelID == PlayerModels::AdaptiveBeamAlphaBeta)
-    {
+        players[playerID].push_back(PlayerPtr(new Player_StratifiedPolicySearch(
+            playerID, PlayerModels::getID(enemyPlayerModel), iterations,
+            responses, timeLimit, hpLevelDiv)));
+    } else if (playerModelID == PlayerModels::AdaptiveBeamAlphaBeta) {
         int timeLimitMS;
         int maxChildren;
         int beamSize;
@@ -655,34 +588,28 @@ void SearchExperiment::addPlayer(const std::string &line)
         params.setPolicyFilename(policyFilename);
 
         // add scripts for move ordering
-        if (moveOrderingID == MoveOrderMethod::ScriptFirst)
-        {
+        if (moveOrderingID == MoveOrderMethod::ScriptFirst) {
             params.addOrderedMoveScript(PlayerModels::NOKDPS);
             params.addOrderedMoveScript(PlayerModels::KiterDPS);
-            //params.addOrderedMoveScript(PlayerModels::Cluster);
-            //params.addOrderedMoveScript(PlayerModels::AttackWeakest);
+            // params.addOrderedMoveScript(PlayerModels::Cluster);
+            // params.addOrderedMoveScript(PlayerModels::AttackWeakest);
         }
 
         // set opponent modeling if it's not none
-        if (opponentModelID != PlayerModels::None)
-        {
-            if (playerID == 0)
-            {
+        if (opponentModelID != PlayerModels::None) {
+            if (playerID == 0) {
                 params.setSimScripts(playoutScriptID1, opponentModelID);
                 params.setPlayerModel(1, playoutScriptID2);
-            }
-            else
-            {
+            } else {
                 params.setSimScripts(opponentModelID, playoutScriptID2);
                 params.setPlayerModel(0, playoutScriptID1);
             }
         }
 
-        PlayerPtr abPlayer(new Player_AdaptiveBeamAlphaBeta(playerID, params, TTPtr((TranspositionTable *)NULL)));
+        PlayerPtr abPlayer(new Player_AdaptiveBeamAlphaBeta(
+            playerID, params, TTPtr((TranspositionTable *)NULL)));
         players[playerID].push_back(abPlayer);
-    }
-    else if (playerModelID == PlayerModels::AlphaBeta)
-    {
+    } else if (playerModelID == PlayerModels::AlphaBeta) {
         int timeLimitMS;
         int maxChildren;
         std::string moveOrdering;
@@ -727,8 +654,7 @@ void SearchExperiment::addPlayer(const std::string &line)
         params.setPlayerToMoveMethod(playerToMoveID);
 
         // add scripts for move ordering
-        if (moveOrderingID == MoveOrderMethod::ScriptFirst)
-        {
+        if (moveOrderingID == MoveOrderMethod::ScriptFirst) {
             params.addOrderedMoveScript(PlayerModels::NOKDPS);
             params.addOrderedMoveScript(PlayerModels::KiterDPS);
             //  params.addOrderedMoveScript(PlayerModels::Cluster);
@@ -736,25 +662,20 @@ void SearchExperiment::addPlayer(const std::string &line)
         }
 
         // set opponent modeling if it's not none
-        if (opponentModelID != PlayerModels::None)
-        {
-            if (playerID == 0)
-            {
+        if (opponentModelID != PlayerModels::None) {
+            if (playerID == 0) {
                 params.setSimScripts(playoutScriptID1, opponentModelID);
                 params.setPlayerModel(1, playoutScriptID2);
-            }
-            else
-            {
+            } else {
                 params.setSimScripts(opponentModelID, playoutScriptID2);
                 params.setPlayerModel(0, playoutScriptID1);
             }
         }
 
-        PlayerPtr abPlayer(new Player_AlphaBeta(playerID, params, TTPtr((TranspositionTable *)NULL)));
+        PlayerPtr abPlayer(new Player_AlphaBeta(
+            playerID, params, TTPtr((TranspositionTable *)NULL)));
         players[playerID].push_back(abPlayer);
-    }
-    else if (playerModelID == PlayerModels::UCT)
-    {
+    } else if (playerModelID == PlayerModels::UCT) {
         int timeLimitMS;
         double cValue;
         int maxTraversals;
@@ -799,26 +720,21 @@ void SearchExperiment::addPlayer(const std::string &line)
         params.setEvalMethod(evalMethodID);
         params.setSimScripts(playoutScriptID1, playoutScriptID2);
         params.setPlayerToMoveMethod(playerToMoveID);
-        //params.setGraphVizFilename("__uct.txt");
+        // params.setGraphVizFilename("__uct.txt");
 
         // add scripts for move ordering
-        if (moveOrderingID == MoveOrderMethod::ScriptFirst)
-        {
+        if (moveOrderingID == MoveOrderMethod::ScriptFirst) {
             params.addOrderedMoveScript(PlayerModels::NOKDPS);
             params.addOrderedMoveScript(PlayerModels::KiterDPS);
-            //params.addOrderedMoveScript(PlayerModels::Cluster);
+            // params.addOrderedMoveScript(PlayerModels::Cluster);
         }
 
         // set opponent modeling if it's not none
-        if (opponentModelID != PlayerModels::None)
-        {
-            if (playerID == 0)
-            {
+        if (opponentModelID != PlayerModels::None) {
+            if (playerID == 0) {
                 params.setSimScripts(playoutScriptID1, opponentModelID);
                 params.setPlayerModel(1, playoutScriptID2);
-            }
-            else
-            {
+            } else {
                 params.setSimScripts(opponentModelID, playoutScriptID2);
                 params.setPlayerModel(0, playoutScriptID1);
             }
@@ -826,46 +742,41 @@ void SearchExperiment::addPlayer(const std::string &line)
 
         PlayerPtr uctPlayer(new Player_UCT(playerID, params));
         players[playerID].push_back(uctPlayer);
-    }
-    else
-    {
-        System::FatalError("Invalid Player Type in Configuration File: " + playerModelString);
+    } else {
+        System::FatalError("Invalid Player Type in Configuration File: " +
+                           playerModelString);
     }
 }
 
-Position SearchExperiment::getRandomPosition(const PositionType &xlimit, const PositionType &ylimit)
-{
+Position SearchExperiment::getRandomPosition(const PositionType &xlimit,
+                                             const PositionType &ylimit) {
     int x = xlimit - (rand.nextInt() % (2 * xlimit));
     int y = ylimit - (rand.nextInt() % (2 * ylimit));
 
     return Position(x, y);
 }
 
-GameState SearchExperiment::getSymmetricVerticalLineState(std::vector<std::string> &unitTypes, std::vector<int> &numUnits,
-                                                          const PositionType &xLimit, const PositionType &yLimit)
-{
+GameState SearchExperiment::getSymmetricVerticalLineState(
+    std::vector<std::string> &unitTypes, std::vector<int> &numUnits,
+    const PositionType &xLimit, const PositionType &yLimit) {
     GameState state;
 
     Position mid(640, 360);
 
-    //std::cout << "   Adding";
+    // std::cout << "   Adding";
 
     // for each unit type to add
-    for (size_t i(0); i < unitTypes.size(); ++i)
-    {
+    for (size_t i(0); i < unitTypes.size(); ++i) {
         BWAPI::UnitType type;
-        for (const BWAPI::UnitType &t : BWAPI::UnitTypes::allUnitTypes())
-        {
-            if (t.getName().compare(unitTypes[i]) == 0)
-            {
+        for (const BWAPI::UnitType &t : BWAPI::UnitTypes::allUnitTypes()) {
+            if (t.getName().compare(unitTypes[i]) == 0) {
                 type = t;
                 break;
             }
         }
 
         // add the symmetric unit for each count in the numUnits Vector
-        for (int u(0); u < numUnits[i]; ++u)
-        {
+        for (int u(0); u < numUnits[i]; ++u) {
             Position r(rand.nextInt() % 20, rand.nextInt() % 20);
             Position u1(mid.x() + 212 + r.x(), mid.y() + u * 20 + r.y());
             Position u2(mid.x() - 212 + r.x(), mid.y() + u * 20 + r.y());
@@ -875,37 +786,34 @@ GameState SearchExperiment::getSymmetricVerticalLineState(std::vector<std::strin
         }
     }
 
-    //std::cout << std::endl;
+    // std::cout << std::endl;
     state.finishedMoving();
     return state;
 }
 
-GameState SearchExperiment::getSymmetricState(std::vector<std::string> &unitTypes, std::vector<int> &numUnits,
-                                              const PositionType &xLimit, const PositionType &yLimit)
-{
+GameState SearchExperiment::getSymmetricState(
+    std::vector<std::string> &unitTypes, std::vector<int> &numUnits,
+    const PositionType &xLimit, const PositionType &yLimit) {
     GameState state;
 
     Position mid(640, 360);
 
-    //std::cout << "   Adding";
+    // std::cout << "   Adding";
 
     // for each unit type to add
-    for (size_t i(0); i < unitTypes.size(); ++i)
-    {
+    for (size_t i(0); i < unitTypes.size(); ++i) {
         BWAPI::UnitType type;
-        for (const BWAPI::UnitType &t : BWAPI::UnitTypes::allUnitTypes())
-        {
-            if (t.getName().compare(unitTypes[i]) == 0)
-            {
+        for (const BWAPI::UnitType &t : BWAPI::UnitTypes::allUnitTypes()) {
+            if (t.getName().compare(unitTypes[i]) == 0) {
                 type = t;
                 break;
             }
         }
 
         // add the symmetric unit for each count in the numUnits Vector
-        for (int u(0); u < numUnits[i]; ++u)
-        {
-            Position r((rand.nextInt() % (2 * xLimit)) - xLimit, (rand.nextInt() % (2 * yLimit)) - yLimit);
+        for (int u(0); u < numUnits[i]; ++u) {
+            Position r((rand.nextInt() % (2 * xLimit)) - xLimit,
+                       (rand.nextInt() % (2 * yLimit)) - yLimit);
             Position u1(mid.x() + r.x(), mid.y() + r.y());
             Position u2(mid.x() - r.x(), mid.y() - r.y());
 
@@ -914,36 +822,33 @@ GameState SearchExperiment::getSymmetricState(std::vector<std::string> &unitType
         }
     }
 
-    //std::cout << std::endl;
+    // std::cout << std::endl;
     state.finishedMoving();
     return state;
 }
 
-void SearchExperiment::addSeparatedState(std::vector<std::string> &unitTypes, std::vector<int> &numUnits,
-                                         const PositionType cx1, const PositionType cy1,
-                                         const PositionType cx2, const PositionType cy2,
-                                         const PositionType &xLimit, const PositionType &yLimit)
-{
+void SearchExperiment::addSeparatedState(
+    std::vector<std::string> &unitTypes, std::vector<int> &numUnits,
+    const PositionType cx1, const PositionType cy1, const PositionType cx2,
+    const PositionType cy2, const PositionType &xLimit,
+    const PositionType &yLimit) {
     GameState state;
     GameState state2;
 
     // for each unit type to add
-    for (size_t i(0); i < unitTypes.size(); ++i)
-    {
+    for (size_t i(0); i < unitTypes.size(); ++i) {
         BWAPI::UnitType type;
-        for (const BWAPI::UnitType &t : BWAPI::UnitTypes::allUnitTypes())
-        {
-            if (t.getName().compare(unitTypes[i]) == 0)
-            {
+        for (const BWAPI::UnitType &t : BWAPI::UnitTypes::allUnitTypes()) {
+            if (t.getName().compare(unitTypes[i]) == 0) {
                 type = t;
                 break;
             }
         }
 
         // add the symmetric unit for each count in the numUnits Vector
-        for (int u(0); u < numUnits[i]; ++u)
-        {
-            Position r((rand.nextInt() % (2 * xLimit)) - xLimit, (rand.nextInt() % (2 * yLimit)) - yLimit);
+        for (int u(0); u < numUnits[i]; ++u) {
+            Position r((rand.nextInt() % (2 * xLimit)) - xLimit,
+                       (rand.nextInt() % (2 * yLimit)) - yLimit);
             Position u1(cx1 + r.x(), cy1 + r.y());
             Position u2(cx2 - r.x(), cy2 - r.y());
 
@@ -960,8 +865,9 @@ void SearchExperiment::addSeparatedState(std::vector<std::string> &unitTypes, st
     states.push_back(state2);
 }
 
-svv SearchExperiment::getExpDescription(const size_t &p1Ind, const size_t &p2Ind, const size_t &state)
-{
+svv SearchExperiment::getExpDescription(const size_t &p1Ind,
+                                        const size_t &p2Ind,
+                                        const size_t &state) {
     // 2-column description vector
     svv desc(2, sv());
 
@@ -972,24 +878,20 @@ svv SearchExperiment::getExpDescription(const size_t &p1Ind, const size_t &p2Ind
     desc[0].push_back("State #:");
     desc[0].push_back("Units:");
 
-    for (size_t p1(0); p1 < players[0].size(); ++p1)
-    {
+    for (size_t p1(0); p1 < players[0].size(); ++p1) {
         std::stringstream ss;
         ss << "P1 " << p1 << ":";
         desc[0].push_back(ss.str());
     }
 
-    for (size_t p2(0); p2 < players[1].size(); ++p2)
-    {
+    for (size_t p2(0); p2 < players[1].size(); ++p2) {
         std::stringstream ss;
         ss << "P2 " << p2 << ":";
         desc[0].push_back(ss.str());
     }
 
-    for (size_t p1(0); p1 < players[0].size(); ++p1)
-    {
-        for (size_t p2(0); p2 < players[1].size(); ++p2)
-        {
+    for (size_t p1(0); p1 < players[0].size(); ++p1) {
+        for (size_t p2(0); p2 < players[1].size(); ++p2) {
             std::stringstream ps;
             ps << p1 << " vs " << p2;
             desc[0].push_back(ps.str());
@@ -1009,25 +911,22 @@ svv SearchExperiment::getExpDescription(const size_t &p1Ind, const size_t &p2Ind
     desc[1].push_back(ss.str());
     ss.str(std::string());
 
-    for (size_t p1(0); p1 < players[0].size(); ++p1)
-    {
+    for (size_t p1(0); p1 < players[0].size(); ++p1) {
         desc[1].push_back(PlayerModels::getName(players[0][p1]->getType()));
     }
 
-    for (size_t p2(0); p2 < players[1].size(); ++p2)
-    {
+    for (size_t p2(0); p2 < players[1].size(); ++p2) {
         desc[1].push_back(PlayerModels::getName(players[1][p2]->getType()));
     }
 
     char buf[30];
-    for (size_t p1(0); p1 < players[0].size(); ++p1)
-    {
-        for (size_t p2(0); p2 < players[1].size(); ++p2)
-        {
+    for (size_t p1(0); p1 < players[0].size(); ++p1) {
+        for (size_t p2(0); p2 < players[1].size(); ++p2) {
             double score = 0;
-            if (numGames[p1][p2] > 0)
-            {
-                score = ((double)numWins[p1][p2] / (double)(numGames[p1][p2])) + 0.5 * ((double)numDraws[p1][p2] / (double)numGames[p1][p2]);
+            if (numGames[p1][p2] > 0) {
+                score =
+                    ((double)numWins[p1][p2] / (double)(numGames[p1][p2])) +
+                    0.5 * ((double)numDraws[p1][p2] / (double)numGames[p1][p2]);
             }
 
             sprintf(buf, "%.7lf", score);
@@ -1038,12 +937,9 @@ svv SearchExperiment::getExpDescription(const size_t &p1Ind, const size_t &p2Ind
     return desc;
 }
 
-std::string SearchExperiment::getBaseFilename(const std::string &filename)
-{
-    for (int i(filename.length() - 1); i >= 0; --i)
-    {
-        if (filename[i] == '/' || filename[i] == '\\')
-        {
+std::string SearchExperiment::getBaseFilename(const std::string &filename) {
+    for (int i(filename.length() - 1); i >= 0; --i) {
+        if (filename[i] == '/' || filename[i] == '\\') {
             return filename.substr(i + 1, filename.length());
         }
     }
@@ -1051,107 +947,108 @@ std::string SearchExperiment::getBaseFilename(const std::string &filename)
     return filename;
 }
 
-void SearchExperiment::runExperiment()
-{
+void SearchExperiment::runExperiment() {
     std::ofstream results(getResultsOutFileName().c_str());
-    if (!results.is_open())
-    {
+    if (!results.is_open()) {
         System::FatalError("Problem Opening Output File: Results Raw");
     }
 
     // set the map file for all states
-    for (size_t state(0); state < states.size(); ++state)
-    {
+    for (size_t state(0); state < states.size(); ++state) {
         states[state].setMap(map);
     }
 
 #ifdef USING_VISUALIZATION_LIBRARIES
     GUI *disp = NULL;
-    if (showDisplay)
-    {
-        disp = new GUI(map ? map->getBuildTileWidth() : 40, map ? map->getBuildTileHeight() : 22);
+    if (showDisplay) {
+        disp = new GUI(map ? map->getBuildTileWidth() : 40,
+                       map ? map->getBuildTileHeight() : 22);
         disp->SetImageDir(imageDir);
         disp->OnStart();
         disp->LoadMapTexture(map, 19);
     }
 #endif
 
-    results << "   P1    P2    ST  UNIT       EVAL    RND           MS | UnitType PlayerID CurrentHP XPos YPos\n";
+    results << "   P1    P2    ST  UNIT       EVAL    RND           MS | "
+               "UnitType PlayerID CurrentHP XPos YPos\n";
 
     // for each player one player
-    for (size_t p1Player(0); p1Player < players[0].size(); p1Player++)
-    {
+    for (size_t p1Player(0); p1Player < players[0].size(); p1Player++) {
         // for each player two player
-        for (size_t p2Player(0); p2Player < players[1].size(); p2Player++)
-        {
+        for (size_t p2Player(0); p2Player < players[1].size(); p2Player++) {
             // for each state we care about
-            for (size_t state(0); state < states.size(); ++state)
-            {
+            for (size_t state(0); state < states.size(); ++state) {
                 char buf[255];
                 // fprintf(stderr, "%s  ", configFileSmall.c_str());
-                // fprintf(stderr, "%5d %5d %5d %5d", (int)p1Player, (int)p2Player, (int)state, (int)states[state].numUnits(Players::Player_One));
-                sprintf(buf, "%5d %5d %5d %5d", (int)p1Player, (int)p2Player, (int)state, (int)states[state].numUnits(Players::Player_One));
+                // fprintf(stderr, "%5d %5d %5d %5d", (int)p1Player,
+                // (int)p2Player, (int)state,
+                // (int)states[state].numUnits(Players::Player_One));
+                sprintf(buf, "%5d %5d %5d %5d", (int)p1Player, (int)p2Player,
+                        (int)state,
+                        (int)states[state].numUnits(Players::Player_One));
                 results << buf;
 
                 resultsPlayers[0].push_back(p1Player);
                 resultsPlayers[1].push_back(p2Player);
                 resultsStateNumber[p1Player][p2Player].push_back(state);
-                resultsNumUnits[p1Player][p2Player].push_back(states[state].numUnits(Players::Player_One));
+                resultsNumUnits[p1Player][p2Player].push_back(
+                    states[state].numUnits(Players::Player_One));
 
                 // get player one
                 PlayerPtr playerOne(players[0][p1Player]);
 
-                // give it a new transposition table if it's an alpha beta player
-                Player_AlphaBeta *p1AB = dynamic_cast<Player_AlphaBeta *>(playerOne.get());
-                if (p1AB)
-                {
-                    p1AB->setTranspositionTable(TTPtr(new TranspositionTable()));
+                // give it a new transposition table if it's an alpha beta
+                // player
+                Player_AlphaBeta *p1AB =
+                    dynamic_cast<Player_AlphaBeta *>(playerOne.get());
+                if (p1AB) {
+                    p1AB->setTranspositionTable(
+                        TTPtr(new TranspositionTable()));
                 }
 
                 // get player two
                 PlayerPtr playerTwo(players[1][p2Player]);
-                Player_AlphaBeta *p2AB = dynamic_cast<Player_AlphaBeta *>(playerTwo.get());
-                if (p2AB)
-                {
-                    p2AB->setTranspositionTable(TTPtr(new TranspositionTable()));
+                Player_AlphaBeta *p2AB =
+                    dynamic_cast<Player_AlphaBeta *>(playerTwo.get());
+                if (p2AB) {
+                    p2AB->setTranspositionTable(
+                        TTPtr(new TranspositionTable()));
                 }
 
                 // construct the game
                 Game g(states[state], playerOne, playerTwo, 20000);
                 ScoreType gameEval = 0;
 
-                if (showDisplay)
-                {
+                if (showDisplay) {
                     static GUI gui(1280, 720);
                     gui.setGame(g);
 
-                    while (!gui.getGame().gameOver())
-                    {
+                    while (!gui.getGame().gameOver()) {
                         gui.onFrame();
                     }
 
-                    gameEval = gui.getGame().getState().eval(Players::Player_One, SparCraft::EvaluationMethods::LTD2).val();
-                }
-                else
-                {
+                    gameEval = gui.getGame()
+                                   .getState()
+                                   .eval(Players::Player_One,
+                                         SparCraft::EvaluationMethods::LTD2)
+                                   .val();
+                } else {
                     g.play();
-                    //printf("Finished in %d rounds \n", g.getRounds());
-                    gameEval = g.getState().eval(Players::Player_One, SparCraft::EvaluationMethods::LTD2).val();
+                    // printf("Finished in %d rounds \n", g.getRounds());
+                    gameEval = g.getState()
+                                   .eval(Players::Player_One,
+                                         SparCraft::EvaluationMethods::LTD2)
+                                   .val();
                 }
 
                 numGames[p1Player][p2Player]++;
-                if (gameEval > 0)
-                {
+                if (gameEval > 0) {
                     cout << "Winner 0" << endl;
                     numWins[p1Player][p2Player]++;
-                }
-                else if (gameEval < 0)
-                {
+                } else if (gameEval < 0) {
                     cout << "Winner 1" << endl;
                     numLosses[p1Player][p2Player]++;
-                }
-                else if (gameEval == 0)
-                {
+                } else if (gameEval == 0) {
                     cout << "Draw" << endl;
                     numDraws[p1Player][p2Player]++;
                 }
@@ -1176,17 +1073,16 @@ void SearchExperiment::runExperiment()
     results.close();
 }
 
-void SearchExperiment::printStateUnits(std::ofstream &results, GameState &state)
-{
+void SearchExperiment::printStateUnits(std::ofstream &results,
+                                       GameState &state) {
     std::stringstream ss;
-    for (size_t p(0); p < Constants::Num_Players; ++p)
-    {
-        for (size_t u(0); u < state.numUnits(p); ++u)
-        {
+    for (size_t p(0); p < Constants::Num_Players; ++p) {
+        for (size_t u(0); u < state.numUnits(p); ++u) {
             Unit &unit(state.getUnit(p, u));
             Position pos(unit.currentPosition(state.getTime()));
 
-            ss << " | " << unit.name() << " " << (int)unit.player() << " " << unit.currentHP() << " " << pos.x() << " " << pos.y();
+            ss << " | " << unit.name() << " " << (int)unit.player() << " "
+               << unit.currentHP() << " " << pos.x() << " " << pos.y();
         }
     }
     results << ss.str();

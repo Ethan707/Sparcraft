@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 11:04:23
-LastEditTime: 2021-07-15 19:28:37
+LastEditTime: 2021-07-17 00:03:50
 LastEditors: Ethan Chen
 Description: Evaluation function for BUS
 FilePath: \Sparcraft\script\evaluation.py
@@ -71,37 +71,13 @@ class Evaluation():
 
     def play_n_matches(self, n, p1, p2):
 
-        self.num_cpu = int(os.environ.get('SLURM_CPUS_PER_TASK', default=4))
-
         br_victories = 0
         player_victories = 0
-
-        params = []
-        for i in range(n):
-            if i % 2 == 0:
-                params.append((p1, p2))
-            else:
-                params.append((p2, p1))
 
         Evaluation.number_matches_played = 0
 
         try:
-            with ProcessPoolExecutor(max_workers=self.num_cpu) as executor:
-                args = ((player1, player2) for player1, player2 in params)
-                results = executor.map(Evaluation.play_match_parallel, args)
-            for result in results:
-                hasEverWon = result[0]
-                who_won = result[1]
-                player1 = result[2]
-                player2 = result[3]
-
-                if hasEverWon:
-                    if who_won == 1 and p1.get_name() == player1.get_name():
-                        br_victories += 1
-                    elif who_won == 2 and p1.get_name() == player2.get_name():
-                        br_victories += 1
-                    else:
-                        player_victories += 1
+            game = Game(p1, p2, '')
         except Exception:
             return None, None, True
 
