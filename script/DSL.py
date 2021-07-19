@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 15:34:52
-LastEditTime: 2021-07-19 20:09:59
+LastEditTime: 2021-07-19 20:11:38
 LastEditors: Ethan Chen
 Description: DSL for Sparcarft
 FilePath: \Sparcraft\script\DSL.py
@@ -83,6 +83,10 @@ class Node:
     @classmethod
     def class_name(cls):
         return cls.__name__
+
+    @classmethod
+    def accepted_rules(cls, child):
+        return cls.accepted_types[child]
 
 
 class Times(Node):
