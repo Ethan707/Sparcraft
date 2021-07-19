@@ -1,10 +1,10 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 11:04:23
-LastEditTime: 2021-07-19 17:24:53
+LastEditTime: 2021-07-19 02:43:46
 LastEditors: Ethan Chen
 Description: Evaluation function for BUS
-FilePath: \Sparcraft\script\evaluation.py
+FilePath: /Sparcraft/script/evaluation.py
 '''
 
 import os
@@ -91,6 +91,7 @@ class Evaluation():
             if error:
                 return 0.0, error, number_matches_played
 
+            print("Successful")
             if br_victories is None:
                 br_victories = br_victories_local
             else:

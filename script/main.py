@@ -1,10 +1,10 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 12:40:17
-LastEditTime: 2021-07-19 16:26:50
+LastEditTime: 2021-07-19 02:42:22
 LastEditors: Ethan Chen
 Description: 
-FilePath: \Sparcraft\script\main.py
+FilePath: /Sparcraft/script/main.py
 '''
 from Game import *
 from BUS import *
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # game.print_result()
     bound = 100
     use_triage = True
-    eval_function = Evaluation()
+    eval_function = PlayWithRandomPlayer(10)
     algorithm = ButtomUpSearch('', '')
     algorithm.search(
         bound,

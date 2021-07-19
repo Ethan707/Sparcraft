@@ -1,10 +1,10 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 15:34:52
-LastEditTime: 2021-07-19 16:25:02
+LastEditTime: 2021-07-19 02:46:29
 LastEditors: Ethan Chen
 Description: DSL for Sparcarft
-FilePath: \Sparcraft\script\DSL.py
+FilePath: /Sparcraft/script/DSL.py
 '''
 import numpy as np
 import itertools
