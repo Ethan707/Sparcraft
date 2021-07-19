@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 15:34:52
-LastEditTime: 2021-07-19 20:11:38
+LastEditTime: 2021-07-19 20:14:10
 LastEditors: Ethan Chen
 Description: DSL for Sparcarft
 FilePath: \Sparcraft\script\DSL.py
@@ -143,8 +143,8 @@ class Times(Node):
                         for p2 in programs2:
 
                             times = Times()
-                            times.addChild(p1)
-                            times.addChild(p2)
+                            times.add_child(p1)
+                            times.add_child(p2)
                             new_programs.append(times)
 
                             yield times
@@ -203,8 +203,8 @@ class Plus(Node):
                         for p2 in programs2:
 
                             plus = Plus()
-                            plus.addChild(p1)
-                            plus.addChild(p2)
+                            plus.add_child(p1)
+                            plus.add_child(p2)
                             new_programs.append(plus)
 
                             yield plus
@@ -263,8 +263,8 @@ class Minus(Node):
                         for p2 in programs2:
 
                             minus = Minus()
-                            minus.addChild(p1)
-                            minus.addChild(p2)
+                            minus.add_child(p1)
+                            minus.add_child(p2)
                             new_programs.append(minus)
 
                             yield minus
@@ -300,7 +300,7 @@ class Argmax(Node):
 
             for p1 in programs1:
                 am = Argmax()
-                am.addChild(p1)
+                am.add_child(p1)
                 new_programs.append(am)
 
                 yield am
@@ -337,7 +337,7 @@ class Argmin(Node):
             for p1 in programs1:
 
                 am = Argmin()
-                am.addChild(p1)
+                am.add_child(p1)
                 new_programs.append(am)
 
                 yield am
@@ -391,8 +391,8 @@ class IT(Node):
                             continue
                         for p2 in programs2:
                             it = IT()
-                            it.addChild(p1)
-                            it.addChild(p2)
+                            it.add_child(p1)
+                            it.add_child(p2)
                             new_programs.append(it)
                             yield it
         return new_programs
@@ -451,9 +451,9 @@ class ITE(Node):
                                     continue
                                 for p3 in programs3:
                                     ite = ITE()
-                                    ite.addChild(p1)
-                                    ite.addChild(p2)
-                                    ite.addChild(p3)
+                                    ite.add_child(p1)
+                                    ite.add_child(p2)
+                                    ite.add_child(p3)
                                     new_programs.append(ite)
                                     yield ite
         return new_programs
@@ -512,8 +512,8 @@ class LT(Node):
                         for p2 in programs2:
 
                             lt = LT()
-                            lt.addChild(p1)
-                            lt.addChild(p2)
+                            lt.add_child(p1)
+                            lt.add_child(p2)
                             new_programs.append(lt)
 
                             yield lt
@@ -573,8 +573,8 @@ class Equal(Node):
                         for p2 in programs2:
 
                             lt = Equal()
-                            lt.addChild(p1)
-                            lt.addChild(p2)
+                            lt.add_child(p1)
+                            lt.add_child(p2)
                             new_programs.append(lt)
 
                             yield lt
@@ -612,7 +612,7 @@ class Sum(Node):
             for p1 in programs1:
 
                 sum_p = Sum()
-                sum_p.addChild(p1)
+                sum_p.add_child(p1)
                 new_programs.append(sum_p)
 
                 yield sum_p
@@ -672,8 +672,8 @@ class And(Node):
                         for p2 in programs2:
 
                             lt = And()
-                            lt.addChild(p1)
-                            lt.addChild(p2)
+                            lt.add_child(p1)
+                            lt.add_child(p2)
                             new_programs.append(lt)
 
                             yield lt
@@ -733,8 +733,8 @@ class Or(Node):
                         for p2 in programs2:
 
                             lt = Or()
-                            lt.addChild(p1)
-                            lt.addChild(p2)
+                            lt.add_child(p1)
+                            lt.add_child(p2)
                             new_programs.append(lt)
 
                             yield lt
@@ -776,7 +776,7 @@ class Not(Node):
             for p1 in programs1:
 
                 sum_p = Not()
-                sum_p.addChild(p1)
+                sum_p.add_child(p1)
                 new_programs.append(sum_p)
 
                 yield sum_p
