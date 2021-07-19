@@ -1,10 +1,10 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 15:34:52
-LastEditTime: 2021-07-19 02:46:29
+LastEditTime: 2021-07-19 20:09:59
 LastEditors: Ethan Chen
 Description: DSL for Sparcarft
-FilePath: /Sparcraft/script/DSL.py
+FilePath: \Sparcraft\script\DSL.py
 '''
 import numpy as np
 import itertools
@@ -305,7 +305,7 @@ class Argmax(Node):
 
 class Argmin(Node):
     def __init__(self):
-        super(Argmax, self).__init__()
+        super(Argmin, self).__init__()
         self.max_limit = 1
 
     @classmethod
@@ -458,7 +458,7 @@ class ITE(Node):
 class LT(Node):
     def __init__(self):
         super(LT, self).__init__()
-        self.number_children = 2
+        self.max_limit = 2
 
     @classmethod
     def new(cls, left, right):
@@ -519,7 +519,7 @@ class LT(Node):
 class Equal(Node):
     def __init__(self):
         super(Equal, self).__init__()
-        self.number_children = 2
+        self.max_limit = 2
 
     @classmethod
     def new(cls, left, right):
@@ -580,7 +580,7 @@ class Equal(Node):
 class Sum(Node):
     def __init__(self):
         super(Sum, self).__init__()
-        self.number_children = 1
+        self.max_limit = 1
 
     @classmethod
     def new(cls, var):
@@ -618,7 +618,7 @@ class Sum(Node):
 class And(Node):
     def __init__(self):
         super(And, self).__init__()
-        self.number_children = 2
+        self.max_limit = 2
 
     @classmethod
     def new(cls, left, right):
@@ -679,7 +679,7 @@ class And(Node):
 class Or(Node):
     def __init__(self):
         super(Or, self).__init__()
-        self.number_children = 2
+        self.max_limit = 2
 
     @classmethod
     def new(cls, left, right):
@@ -740,7 +740,7 @@ class Or(Node):
 class Not(Node):
     def __init__(self):
         super(Not, self).__init__()
-        self.number_children = 1
+        self.max_limit = 1
 
     @classmethod
     def new(cls, left):
@@ -783,7 +783,7 @@ class Map(Node):
     def __init__(self):
         super(Map, self).__init__()
 
-        self.number_children = 2
+        self.max_limit = 2
 
     @classmethod
     def new(cls, func, l):
@@ -849,7 +849,7 @@ class Map(Node):
 class Function(Node):
     def __init__(self):
         super(Function, self).__init__()
-        self.number_children = 1
+        self.max_limit = 1
 
     @classmethod
     def new(cls, var):
@@ -888,7 +888,7 @@ class StringConstant(Node):
 
     def __init__(self):
         super(StringConstant, self).__init__()
-        self.number_children = 1
+        self.max_limit = 1
         self.size = 0
 
     @classmethod
@@ -915,7 +915,7 @@ class NumericConstant(Node):
 
     def __init__(self):
         super(NumericConstant, self).__init__()
-        self.number_children = 1
+        self.max_limit = 1
         self.size = 0
 
     @classmethod
@@ -942,7 +942,7 @@ class VarList(Node):
 
     def __init__(self):
         super(VarList, self).__init__()
-        self.number_children = 1
+        self.max_limit = 1
         self.size = 0
 
     @classmethod
@@ -969,7 +969,7 @@ class VarScalar(Node):
 
     def __init__(self):
         super(VarScalar, self).__init__()
-        self.number_children = 1
+        self.max_limit = 1
         self.size = 0
 
     @classmethod
