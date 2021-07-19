@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 07:25:46
-LastEditTime: 2021-07-05 09:55:26
+LastEditTime: 2021-07-19 15:30:41
 LastEditors: Ethan Chen
 Description: Attack enemy based on hp
 FilePath: \Sparcraft\script\Player_AttackWeakest.py
@@ -11,8 +11,11 @@ from Constant import *
 
 
 class AttackWeakest:
-    def __init__(self, palyer_id):
-        self.palyer_id = palyer_id
+    def __init__(self):
+        self.player_id = 0
+
+    def set_player_id(self, player_id):
+        self.player_id = player_id
 
     def generate(self, game: GameState):
         result = []

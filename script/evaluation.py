@@ -1,15 +1,16 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 11:04:23
-LastEditTime: 2021-07-17 00:03:50
+LastEditTime: 2021-07-19 17:24:53
 LastEditors: Ethan Chen
 Description: Evaluation function for BUS
 FilePath: \Sparcraft\script\evaluation.py
 '''
 
 import os
-from concurrent.futures.process import ProcessPoolExecutor
 from Game import Game
+from Player_Random import RandomPlayer
+from Program_Player import ProgramPlayer
 
 
 class Evaluation():
@@ -29,28 +30,6 @@ class Evaluation():
 
         return [first_layer, second_layer, third_layer]
 
-    @staticmethod
-    def play_match_parallel(data):
-        p1 = data[0]
-        p2 = data[1]
-
-        Evaluation.number_matches_played += 1
-
-        game = Game(p1, p2)
-        game.init_experiment()
-        game.run_experiment()
-        result = game.get_result()
-
-        if result[0] > result[1]:
-            return True, 1, p1, p2
-        elif result[0] < result[1]:
-            return True, 2, p1, p2
-        elif result[0] == result[1]:
-            if result[1] == 0 and result[2] > 0:
-                return False, None, p1, p2
-            return True, None, p1, p2
-        # have ever won?; program
-
     def play_match(self, p1, p2, save_state_action_pairs=False):
 
         if save_state_action_pairs:
@@ -59,7 +38,6 @@ class Evaluation():
         Evaluation.number_matches_played += 1
 
         game = Game(p1, p2)
-        game.init_experiment()
         game.run_experiment()
         result = game.get_result()
 
@@ -77,7 +55,13 @@ class Evaluation():
         Evaluation.number_matches_played = 0
 
         try:
-            game = Game(p1, p2, '')
+            game = Game(p1, p2, num_exp=n)
+            game.run_experiment()
+            result = game.get_result()
+
+            br_victories = result[1]
+            player_victories = result[2]
+
         except Exception:
             return None, None, True
 
@@ -119,3 +103,18 @@ class Evaluation():
                 return br_victories / number_matches_played, error, number_matches_played
 
         return br_victories / number_matches_played, error, number_matches_played
+
+
+class PlayWithRandomPlayer(Evaluation):
+    def __init__(self, number_evaluations):
+        super(PlayWithRandomPlayer, self).__init__()
+        self.number_evaluations = number_evaluations
+        self.player = RandomPlayer()
+
+    def eval(self, program):
+        br = ProgramPlayer(program)
+        return super().eval(br, self.player)
+
+    def eval_triage(self, program, current_best_score):
+        br = ProgramPlayer(program)
+        return super().eval_triage(br, self.player, current_best_score)

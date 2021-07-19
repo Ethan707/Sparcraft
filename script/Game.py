@@ -9,20 +9,23 @@ from GameState import GameState, Unit
 PLAYER_ONE = 0
 PLAYER_TWO = 1
 
+EXP_FILE = '../sample_experiment/exp.txt'
+EXE_FILE = '../bin/SparCraft'
+
 
 class Game:
-    def __init__(self, player_0, player_1, exp_file='../sample_experiment/test_exp.txt', execute_file='../bin/SparCraft'):
+    def __init__(self, player_0, player_1, exp_file=EXP_FILE, num_exp=10, execute_file=EXE_FILE):
         self.player_0 = player_0
         self.player_1 = player_1
         self.exp_file = exp_file
-        self.num_exp = 0
+        self.num_exp = num_exp
         self.winner = [0]*3  # player 0 | player 1 | draw
         self.execute_file = execute_file
-        self.process = Popen([self.execute_file, self.exp_file], stdin=PIPE, stdout=PIPE)
+        self.process = Popen([self.execute_file, self.exp_file, self.num_exp], stdin=PIPE, stdout=PIPE)
         self.state = GameState()
 
-        # self.player_0.set_id(0)
-        # self.player_1.set_id(1)
+        self.player_0.set_player_id(0)
+        self.player_1.set_player_id(1)
 
     def processMessage(self, split=' ') -> list:
         '''
@@ -101,13 +104,12 @@ class Game:
     def init_experiment(self):
         message = self.processMessage(self.process)
         # Check program started
-        # Start Message: "Adding 10 State(s)"
-        if message[0] == 'Adding':
-            print("Sub process successfully start")
-        # get amount of experiment
-        self.num_exp = int(message[1])
+        # Start Message: numState
+        assert message[0].isdigit() and int(message[0]) == self.num_exp
+        print("SparCraft starts successfully")
 
     def run_experiment(self):
+        self.init_experiment()
         for i in range(self.num_exp):
             end = False
             while not end:
@@ -123,7 +125,7 @@ class Game:
         if message[0] == "Begin":
             # the game is still in progressing, we need to keep it
             player_message = self.processMessage()
-            assert player_message[0] == "PlayerID"
+            assert player_message[0] == "PlayerID" and player_message[1].isdigit()
             self.state.player_id = int(player_message[1])
             self.processGameState(self.state)
             if self.state.player_id == 0:

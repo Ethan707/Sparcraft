@@ -11,7 +11,10 @@ from Constant import *
 
 
 class Kiter_NOKDPS:
-    def __init__(self, player_id):
+    def __init__(self):
+        self.player_id = 0
+
+    def set_player_id(self, player_id):
         self.player_id = player_id
 
     def generate(self, game: GameState):

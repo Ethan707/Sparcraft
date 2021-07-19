@@ -1,10 +1,21 @@
+'''
+Author: Ethan Chen
+Date: 2021-07-04 11:26:05
+LastEditTime: 2021-07-19 15:31:13
+LastEditors: Ethan Chen
+Description: 
+FilePath: \Sparcraft\script\Player_AttackClosest.py
+'''
 from GameState import GameState
 from Constant import *
 
 
 class AttackClosest:
-    def __init__(self, palyer_id):
-        self.palyer_id = palyer_id
+    def __init__(self):
+        self.player_id = 0
+
+    def set_player_id(self, player_id):
+        self.player_id = player_id
 
     def generate(self, game: GameState):
         result = []

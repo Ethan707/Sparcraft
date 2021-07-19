@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 16:30:54
-LastEditTime: 2021-07-15 19:50:55
+LastEditTime: 2021-07-19 17:00:54
 LastEditors: Ethan Chen
 Description: Buttom up search for sparcraft
 FilePath: \Sparcraft\script\BUS.py
@@ -10,6 +10,7 @@ FilePath: \Sparcraft\script\BUS.py
 from Constant import ATTACK, MOVE, RELOAD
 from GameState import GameState, Unit
 from DSL import *
+from evaluation import Evaluation
 
 
 class ProgramList():
@@ -52,55 +53,46 @@ class ButtomUpSearch():
                                          string_constant_values,
                                          variables_scalar,
                                          variables_list,
-                                         variables_scalar_from_array,
                                          functions_scalars):
         set_of_initial_programs = []
 
         for i in variables_scalar:
             p = VarScalar.new(i)
 
-            if self.detect_equivalence and self.has_equivalent(p):
-                continue
-
-            set_of_initial_programs.append(p)
-
-        for i in variables_scalar_from_array:
-            p = VarScalarFromArray.new(i)
-
-            if self.detect_equivalence and self.has_equivalent(p):
-                continue
+            # if self.detect_equivalence and self.has_equivalent(p):
+            #     continue
 
             set_of_initial_programs.append(p)
 
         for i in variables_list:
             p = VarList.new(i)
 
-            if self.detect_equivalence and self.has_equivalent(p):
-                continue
+            # if self.detect_equivalence and self.has_equivalent(p):
+            #     continue
 
             set_of_initial_programs.append(p)
 
         for i in numeric_constant_values:
             constant = NumericConstant.new(i)
 
-            if self.detect_equivalence and self.has_equivalent(constant):
-                continue
+            # if self.detect_equivalence and self.has_equivalent(constant):
+            #     continue
 
             set_of_initial_programs.append(constant)
 
         for i in string_constant_values:
             constant = StringConstant.new(i)
 
-            if self.detect_equivalence and self.has_equivalent(constant):
-                continue
+            # if self.detect_equivalence and self.has_equivalent(constant):
+            #     continue
 
             set_of_initial_programs.append(constant)
 
         for i in functions_scalars:
             p = i()
 
-            if self.detect_equivalence and self.has_equivalent(p):
-                continue
+            # if self.detect_equivalence and self.has_equivalent(p):
+            #     continue
 
             set_of_initial_programs.append(p)
 
@@ -155,9 +147,8 @@ class ButtomUpSearch():
                string_constant_values,
                variables_scalar,
                variables_list,
-               variables_scalar_from_array,
                functions_scalars,
-               eval_function,
+               eval_function: Evaluation,
                use_triage,
                collect_library=False):
 
@@ -165,7 +156,7 @@ class ButtomUpSearch():
         StringConstant.accepted_types = [set(string_constant_values)]
         VarList.accepted_types = [set(variables_list)]
         VarScalar.accepted_types = [set(variables_scalar)]
-        VarScalarFromArray.accepted_types = [set(variables_scalar_from_array)]
+        # VarScalarFromArray.accepted_types = [set(variables_scalar_from_array)]
 
         self.closed_list = set()
         self.programs_outputs = set()
@@ -174,7 +165,6 @@ class ButtomUpSearch():
                                                                         string_constant_values,
                                                                         variables_scalar,
                                                                         variables_list,
-                                                                        variables_scalar_from_array,
                                                                         functions_scalars)
         self.plist = ProgramList()
         for p in initial_set_of_programs:

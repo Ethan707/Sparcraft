@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 07:10:58
-LastEditTime: 2021-07-05 09:55:39
+LastEditTime: 2021-07-19 15:30:14
 LastEditors: Ethan Chen
 Description: Attack enemy based on DPS
 FilePath: \Sparcraft\script\Player_AttackDPS.py
@@ -11,7 +11,10 @@ from Constant import *
 
 
 class AttackDPS:
-    def __init__(self, player_id):
+    def __init__(self):
+        self.player_id = 0
+
+    def set_player_id(self, player_id):
         self.player_id = player_id
 
     def generate(self, game: GameState):

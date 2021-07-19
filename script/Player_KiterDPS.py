@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 07:43:14
-LastEditTime: 2021-07-05 09:46:19
+LastEditTime: 2021-07-19 15:31:00
 LastEditors: Ethan Chen
 Description: None
 FilePath: \Sparcraft\script\Player_KiterDPS.py
@@ -13,7 +13,10 @@ from Constant import *
 
 
 class Kiter_NOKDPS:
-    def __init__(self, player_id):
+    def __init__(self):
+        self.player_id = 0
+
+    def set_player_id(self, player_id):
         self.player_id = player_id
 
     def generate(self, game: GameState):

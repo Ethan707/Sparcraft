@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 15:34:52
-LastEditTime: 2021-07-15 20:08:16
+LastEditTime: 2021-07-19 16:25:02
 LastEditors: Ethan Chen
 Description: DSL for Sparcarft
 FilePath: \Sparcraft\script\DSL.py
@@ -16,6 +16,11 @@ class Node:
         self.max_limit = 0  # max amount
         self.current_child_amount = 0  # current amount
         self.children = []
+
+        self.local = 'locals'
+        self.intname = 'int'
+        self.listname = 'list'
+        self.tuplename = 'tuple'
 
     def add_child(self, child):
         if len(self.children) + 1 > self.max_limit:
@@ -610,33 +615,6 @@ class Sum(Node):
         return new_programs
 
 
-class VarList(Node):
-
-    def __init__(self):
-        super(VarList, self).__init__()
-        self.number_children = 1
-        self.size = 0
-
-    @classmethod
-    def new(cls, var):
-        inst = cls()
-        inst.add_child(var)
-
-        return inst
-
-    def to_string(self):
-        if len(self.children) == 0:
-            raise Exception('VarList: Incomplete Program')
-
-        return self.children[0]
-
-    def interpret(self, env):
-        if len(self.children) == 0:
-            raise Exception('VarList: Incomplete Program')
-
-        return env[self.children[0]]
-
-
 class And(Node):
     def __init__(self):
         super(And, self).__init__()
@@ -829,6 +807,44 @@ class Map(Node):
 
         return list(map(self.children[0].interpret(env), self.children[1].interpret(env)))
 
+    def grow(plist, size):
+        new_programs = []
+
+        # generates all combinations of cost of size 2 varying from 1 to size - 1
+        combinations = list(itertools.product(range(0, size), repeat=2))
+
+        for c in combinations:
+            # skip if the cost combination exceeds the limit
+            if c[0] + c[1] + 1 != size:
+                continue
+
+            # retrive bank of programs with costs c[0], c[1], and c[2]
+            program_set1 = plist.get_programs(c[0])
+            program_set2 = plist.get_programs(c[1])
+
+            for t1, programs1 in program_set1.items():
+                # skip if t1 isn't a node accepted by Lt
+                if t1 not in Map.accepted_rules(0):
+                    continue
+
+                for p1 in programs1:
+
+                    for t2, programs2 in program_set2.items():
+
+                        # skip if t2 isn't a node accepted by Map
+                        if t2 not in Map.accepted_rules(1):
+                            continue
+
+                        for p2 in programs2:
+
+                            m = Map()
+                            m.add_child(p1)
+                            m.add_child(p2)
+                            new_programs.append(m)
+
+                            yield m
+        return new_programs
+
 
 class Function(Node):
     def __init__(self):
@@ -847,6 +863,25 @@ class Function(Node):
 
     def interpret(self, env):
         return lambda x: self.children[0].interpret_local_variables(env, x)
+
+    def grow(plist, size):
+        new_programs = []
+
+        program_set = plist.get_programs(size - 1)
+
+        for t1, programs1 in program_set.items():
+            # skip if t1 isn't a node accepted by Lt
+            if t1 not in Function.accepted_rules(0):
+                continue
+
+            for p1 in programs1:
+
+                func = Function()
+                func.add_child(p1)
+                new_programs.append(func)
+
+                yield func
+        return new_programs
 
 
 class StringConstant(Node):
@@ -903,6 +938,33 @@ class NumericConstant(Node):
         return self.children[0]
 
 
+class VarList(Node):
+
+    def __init__(self):
+        super(VarList, self).__init__()
+        self.number_children = 1
+        self.size = 0
+
+    @classmethod
+    def new(cls, var):
+        inst = cls()
+        inst.add_child(var)
+
+        return inst
+
+    def to_string(self):
+        if len(self.children) == 0:
+            raise Exception('VarList: Incomplete Program')
+
+        return self.children[0]
+
+    def interpret(self, env):
+        if len(self.children) == 0:
+            raise Exception('VarList: Incomplete Program')
+
+        return env[self.children[0]]
+
+
 class VarScalar(Node):
 
     def __init__(self):
@@ -930,27 +992,70 @@ class VarScalar(Node):
         return env[self.children[0]]
 
 
-class VarScalarFromArray(Node):
-    def __init__(self):
-        super(VarScalarFromArray, self).__init__()
-        self.number_children = 1
-        self.size = 0
+Times.accepted_nodes = set([VarScalar.class_name(),
+                            NumericConstant.class_name(),
+                            Plus.class_name(),
+                            Times.class_name(),
+                            Minus.class_name(),
+                            Sum.class_name()
+                            ])
+Plus.accepted_nodes = set([VarScalar.class_name(),
+                           NumericConstant.class_name(),
+                           Plus.class_name(),
+                           Times.class_name(),
+                           Minus.class_name(),
+                           Sum.class_name()
+                           ])
+Minus.accepted_nodes = set([VarScalar.class_name(),
+                            NumericConstant.class_name(),
+                            Plus.class_name(),
+                            Times.class_name(),
+                            Minus.class_name(),
+                            Sum.class_name()
+                            ])
+Argmax.accepted_nodes = set([Map.class_name(), VarList.class_name()])
+Argmin.accepted_nodes = set([Map.class_name(), VarList.class_name()])
+ITE.accepted_nodes_bool = set([LT.class_name(), Equal.class_name(),
+                               And.class_name(), Or.class_name(), Not.class_name()])
+ITE.accepted_nodes_block = set([ITE.class_name(), IT.class_name(), Argmax.class_name(), Argmin.class_name()])
+IT.accepted_nodes_bool = set([LT.class_name(), Equal.class_name(),
+                              And.class_name(), Or.class_name(), Not.class_name()])
+IT.accepted_nodes_block = set([ITE.class_name(), IT.class_name(), Argmax.class_name(), Argmin.class_name()])
+LT.accepted_nodes = set([NumericConstant.class_name(),
+                         Plus.class_name(),
+                         Times.class_name(),
+                         Minus.class_name(),
+                         Sum.class_name(), VarScalar.class_name()])
+Equal.accepted_nodes = set([NumericConstant.class_name(),
+                            Plus.class_name(),
+                            Times.class_name(),
+                            Minus.class_name(),
+                            Sum.class_name(), VarScalar.class_name()])
+Sum.accepted_nodes = set([Map.class_name(), VarList.class_name()])
+And.accepted_nodes = set([LT.class_name(), Equal.class_name()])
+Or.accepted_nodes = set([LT.class_name(), Equal.class_name()])
+Not.accepted_nodes = set([Equal.class_name()])
+Function.accepted_nodes = set([Minus.class_name(),
+                               Plus.class_name(),
+                               Times.class_name(),
+                               Sum.class_name(),
+                               Map.class_name()])
+Map.accepted_nodes_function = set([Function.class_name()])
+Map.accepted_nodes_list = set([VarList.class_name(), Map.class_name()])
 
-    @classmethod
-    def new(cls, var):
-        inst = cls()
-        inst.add_child(var)
 
-        return inst
-
-    def to_string(self):
-        if len(self.children) == 0:
-            raise Exception('VarScalarFromArray: Incomplete Program')
-
-        return self.children[0]
-
-    def interpret(self, env):
-        if len(self.children) == 0:
-            raise Exception('VarScalarFromArray: Incomplete Program')
-
-        return env[self.children[0]][env[self.local][self.intname]]
+Times.accepted_types = [Times.accepted_nodes, Times.accepted_nodes]
+Plus.accepted_types = [Plus.accepted_nodes, Plus.accepted_nodes]
+Minus.accepted_types = [Minus.accepted_nodes, Minus.accepted_nodes]
+Argmax.accepted_types = [Argmax.accepted_nodes]
+Argmin.accepted_types = [Argmin.accepted_nodes]
+ITE.accepted_types = [ITE.accepted_nodes_bool, ITE.accepted_nodes_block, ITE.accepted_nodes_block]
+IT.accepted_types = [IT.accepted_nodes_bool, IT.accepted_nodes_block]
+LT.accepted_types = [LT.accepted_nodes, LT.accepted_nodes]
+Equal.accepted_types = [Equal.accepted_nodes, Equal.accepted_nodes]
+Sum.accepted_types = [Sum.accepted_nodes]
+And.accepted_types = [And.accepted_nodes, And.accepted_nodes]
+Or.accepted_types = [Or.accepted_nodes, Or.accepted_nodes]
+Not.accepted_types = [Not.accepted_nodes]
+Function.accepted_types = [Function.accepted_nodes]
+Map.accepted_types = [Map.accepted_nodes_function, Map.accepted_nodes_list]

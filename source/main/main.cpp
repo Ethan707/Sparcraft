@@ -6,21 +6,31 @@
 #include "../SparCraft.h"
 #include "SearchExperiment.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     SparCraft::init();
 
-    try {
-        if (argc == 3) {
+    try
+    {
+        if (argc == 3)
+        {
             SparCraft::SearchExperiment exp(argv[1], argv[2]);
             exp.runExperiment();
-        } else {
+        }
+        else
+        {
             SparCraft::System::FatalError(
                 "Please provide experiment file as only argument");
         }
-    } catch (int e) {
-        if (e == SparCraft::System::SPARCRAFT_FATAL_ERROR) {
+    }
+    catch (int e)
+    {
+        if (e == SparCraft::System::SPARCRAFT_FATAL_ERROR)
+        {
             std::cerr << "\nSparCraft FatalError Exception, Shutting Down\n\n";
-        } else {
+        }
+        else
+        {
             std::cerr << "\nUnknown Exception, Shutting Down\n\n";
         }
     }

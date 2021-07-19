@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 07:42:29
-LastEditTime: 2021-07-05 09:45:56
+LastEditTime: 2021-07-19 15:29:00
 LastEditors: Ethan Chen
 Description: None
 FilePath: \Sparcraft\script\Player_NOKDPS.py
@@ -11,7 +11,10 @@ from Constant import *
 
 
 class NOKDPS:
-    def __init__(self, player_id):
+    def __init__(self):
+        self.player_id = 0
+
+    def set_player_id(self, player_id):
         self.player_id = player_id
 
     def generate(self, game: GameState):
