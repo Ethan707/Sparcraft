@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 12:40:17
-LastEditTime: 2021-07-22 21:32:24
+LastEditTime: 2021-07-22 22:15:54
 LastEditors: Ethan Chen
 Description: 
 FilePath: \Sparcraft\script\main.py
@@ -9,7 +9,7 @@ FilePath: \Sparcraft\script\main.py
 from Game import *
 from BUS import *
 from evaluation import *
-from dsl_bus import *
+from base_dsl import *
 from simulated_annealing import *
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 15:34:52
-LastEditTime: 2021-07-22 21:42:17
+LastEditTime: 2021-07-22 22:15:36
 LastEditors: Ethan Chen
 Description: DSL for Sparcarft
 FilePath: \Sparcraft\script\base_DSL.py
@@ -125,6 +125,43 @@ class Times(Node):
 
         return self.children[0].interpret(env) * self.children[1].interpret(env)
 
+    def grow(plist, size):
+        new_programs = []
+
+        # generates all combinations of cost of size 2 varying from 1 to size - 1
+        combinations = list(itertools.product(range(1, size - 1), repeat=2))
+
+        for c in combinations:
+            # skip if the cost combination exceeds the limit
+            if c[0] + c[1] + 1 != size:
+                continue
+
+            # retrive bank of programs with costs c[0], c[1], and c[2]
+            program_set1 = plist.get_programs(c[0])
+            program_set2 = plist.get_programs(c[1])
+
+            for t1, programs1 in program_set1.items():
+                # skip if t1 isn't a node accepted by Lt
+                if t1 not in Times.accepted_rules(0):
+                    continue
+
+                for p1 in programs1:
+
+                    for t2, programs2 in program_set2.items():
+                        # skip if t1 isn't a node accepted by Lt
+                        if t2 not in Times.accepted_rules(1):
+                            continue
+
+                        for p2 in programs2:
+
+                            times = Times()
+                            times.add_child(p1)
+                            times.add_child(p2)
+                            new_programs.append(times)
+
+                            yield times
+        return new_programs
+
 
 class Plus(Node):
     def __init__(self):
@@ -149,6 +186,42 @@ class Plus(Node):
             raise Exception('Plus: Incomplete Program')
         return self.children[0].interpret(env) + self.children[1].interpret(env)
 
+    def grow(plist, size):
+        new_programs = []
+        # generates all combinations of cost of size 2 varying from 1 to size - 1
+        combinations = list(itertools.product(range(1, size - 1), repeat=2))
+
+        for c in combinations:
+            # skip if the cost combination exceeds the limit
+            if c[0] + c[1] + 1 != size:
+                continue
+
+            # retrive bank of programs with costs c[0], c[1], and c[2]
+            program_set1 = plist.get_programs(c[0])
+            program_set2 = plist.get_programs(c[1])
+
+            for t1, programs1 in program_set1.items():
+                # skip if t1 isn't a node accepted by Lt
+                if t1 not in Plus.accepted_rules(0):
+                    continue
+
+                for p1 in programs1:
+
+                    for t2, programs2 in program_set2.items():
+                        # skip if t1 isn't a node accepted by Lt
+                        if t2 not in Plus.accepted_rules(0):
+                            continue
+
+                        for p2 in programs2:
+
+                            plus = Plus()
+                            plus.add_child(p1)
+                            plus.add_child(p2)
+                            new_programs.append(plus)
+
+                            yield plus
+        return new_programs
+
 
 class Minus(Node):
     def __init__(self):
@@ -172,6 +245,43 @@ class Minus(Node):
             raise Exception('Minus: Incomplete Program')
         return self.children[0].interpret(env) - self.children[1].interpret(env)
 
+    def grow(plist, size):
+        new_programs = []
+
+        # generates all combinations of cost of size 2 varying from 1 to size - 1
+        combinations = list(itertools.product(range(1, size - 1), repeat=2))
+
+        for c in combinations:
+            # skip if the cost combination exceeds the limit
+            if c[0] + c[1] + 1 != size:
+                continue
+
+            # retrive bank of programs with costs c[0], c[1], and c[2]
+            program_set1 = plist.get_programs(c[0])
+            program_set2 = plist.get_programs(c[1])
+
+            for t1, programs1 in program_set1.items():
+                # skip if t1 isn't a node accepted by Lt
+                if t1 not in Minus.accepted_rules(0):
+                    continue
+
+                for p1 in programs1:
+
+                    for t2, programs2 in program_set2.items():
+                        # skip if t1 isn't a node accepted by Lt
+                        if t2 not in Minus.accepted_rules(1):
+                            continue
+
+                        for p2 in programs2:
+
+                            minus = Minus()
+                            minus.add_child(p1)
+                            minus.add_child(p2)
+                            new_programs.append(minus)
+
+                            yield minus
+        return new_programs
+
 
 class Argmax(Node):
     def __init__(self):
@@ -191,6 +301,23 @@ class Argmax(Node):
     def interpret(self, env):
         return np.argmax(self.children[0].interpret(env))
 
+    def grow(plist, size):
+        new_programs = []
+        program_set = plist.get_programs(size - 1)
+
+        for t1, programs1 in program_set.items():
+            # skip if t1 isn't a node accepted by Lt
+            if t1 not in Argmax.accepted_rules(0):
+                continue
+
+            for p1 in programs1:
+                am = Argmax()
+                am.add_child(p1)
+                new_programs.append(am)
+
+                yield am
+        return new_programs
+
 
 class Argmin(Node):
     def __init__(self):
@@ -209,6 +336,24 @@ class Argmin(Node):
 
     def interpret(self, env):
         return np.argmin(self.children[0].interpret(env))
+
+    def grow(plist, size):
+        new_programs = []
+        program_set = plist.get_programs(size - 1)
+
+        for t1, programs1 in program_set.items():
+            # skip if t1 isn't a node accepted by Lt
+            if t1 not in Argmin.accepted_rules(0):
+                continue
+
+            for p1 in programs1:
+
+                am = Argmin()
+                am.add_child(p1)
+                new_programs.append(am)
+
+                yield am
+        return new_programs
 
 
 class IT(Node):
@@ -235,6 +380,35 @@ class IT(Node):
         if self.children[0].interpret(env):
             return self.children[1].interpret(env)
 
+    def grow(plist, size):
+        new_programs = []
+
+        # generates all combinations of cost of size 2 varying from 1 to size - 1
+        combinations = list(itertools.product(range(0, size), repeat=2))
+
+        for c in combinations:
+            # skip if the cost combination exceeds the limit
+            if c[0] + c[1] + 1 != size:
+                continue
+
+            # retrive bank of programs with costs c[0], c[1], and c[2]
+            program_set1 = plist.get_programs(c[0])
+            program_set2 = plist.get_programs(c[1])
+            for t1, programs1 in program_set1.items():
+                if t1 not in IT.accepted_rules(0):
+                    continue
+                for p1 in programs1:
+                    for t2, programs2 in program_set2.items():
+                        if t2 not in IT.accepted_rules(1):
+                            continue
+                        for p2 in programs2:
+                            it = IT()
+                            it.add_child(p1)
+                            it.add_child(p2)
+                            new_programs.append(it)
+                            yield it
+        return new_programs
+
 
 class ITE(Node):
     def __init__(self):
@@ -260,6 +434,42 @@ class ITE(Node):
 
         return self.children[1].interpret(env) if self.children[0].interpret(env) else self.children[2].interpret(env)
 
+    def grow(plist, size):
+        new_programs = []
+
+        # generates all combinations of cost of size 2 varying from 1 to size - 1
+        combinations = list(itertools.product(range(0, size), repeat=3))
+
+        for c in combinations:
+            # skip if the cost combination exceeds the limit
+            if c[0] + c[1] + c[2] + 1 != size:
+                continue
+
+            # retrive bank of programs with costs c[0], c[1], and c[2]
+            program_set1 = plist.get_programs(c[0])
+            program_set2 = plist.get_programs(c[1])
+            program_set3 = plist.get_programs(c[2])
+
+            for t1, programs1 in program_set1.items():
+                if t1 not in ITE.accepted_rules(0):
+                    continue
+                for p1 in programs1:
+                    for t2, programs2 in program_set2.items():
+                        if t2 not in ITE.accepted_rules(1):
+                            continue
+                        for p2 in programs2:
+                            for t3, programs3 in program_set3.items():
+                                if t3 not in ITE.accepted_rules(2):
+                                    continue
+                                for p3 in programs3:
+                                    ite = ITE()
+                                    ite.add_child(p1)
+                                    ite.add_child(p2)
+                                    ite.add_child(p3)
+                                    new_programs.append(ite)
+                                    yield ite
+        return new_programs
+
 
 class LT(Node):
     def __init__(self):
@@ -284,6 +494,43 @@ class LT(Node):
             raise Exception('less than: Incomplete Program')
         return self.children[0].interpret(env) < self.children[1].interpret(env)
 
+    def grow(plist, size):
+        new_programs = []
+
+        # generates all combinations of cost of size 2 varying from 1 to size - 1
+        combinations = list(itertools.product(range(0, size), repeat=2))
+
+        for c in combinations:
+            # skip if the cost combination exceeds the limit
+            if c[0] + c[1] + 1 != size:
+                continue
+
+            # retrive bank of programs with costs c[0], c[1], and c[2]
+            program_set1 = plist.get_programs(c[0])
+            program_set2 = plist.get_programs(c[1])
+
+            for t1, programs1 in program_set1.items():
+                # skip if t1 isn't a node accepted by Lt
+                if t1 not in LT.accepted_rules(0):
+                    continue
+
+                for p1 in programs1:
+
+                    for t2, programs2 in program_set2.items():
+                        # skip if t1 isn't a node accepted by Lt
+                        if t2 not in LT.accepted_rules(1):
+                            continue
+
+                        for p2 in programs2:
+
+                            lt = LT()
+                            lt.add_child(p1)
+                            lt.add_child(p2)
+                            new_programs.append(lt)
+
+                            yield lt
+        return new_programs
+
 
 class Sum(Node):
     def __init__(self):
@@ -302,6 +549,25 @@ class Sum(Node):
 
     def interpret(self, env):
         return np.sum(self.children[0].interpret(env))
+
+    def grow(plist, size):
+        new_programs = []
+        # defines which nodes are accepted in the AST
+        program_set = plist.get_programs(size - 1)
+
+        for t1, programs1 in program_set.items():
+            # skip if t1 isn't a node accepted by Lt
+            if t1 not in Sum.accepted_rules(0):
+                continue
+
+            for p1 in programs1:
+
+                sum_p = Sum()
+                sum_p.add_child(p1)
+                new_programs.append(sum_p)
+
+                yield sum_p
+        return new_programs
 
 
 class And(Node):
@@ -327,6 +593,43 @@ class And(Node):
             raise Exception('And: Incomplete Program')
         return self.children[0].interpret(env) and self.children[1].interpret(env)
 
+    def grow(plist, size):
+        new_programs = []
+
+        # generates all combinations of cost of size 2 varying from 1 to size - 1
+        combinations = list(itertools.product(range(0, size), repeat=2))
+
+        for c in combinations:
+            # skip if the cost combination exceeds the limit
+            if c[0] + c[1] + 1 != size:
+                continue
+
+            # retrive bank of programs with costs c[0], c[1], and c[2]
+            program_set1 = plist.get_programs(c[0])
+            program_set2 = plist.get_programs(c[1])
+
+            for t1, programs1 in program_set1.items():
+                # skip if t1 isn't a node accepted by Lt
+                if t1 not in And.accepted_rules(0):
+                    continue
+
+                for p1 in programs1:
+
+                    for t2, programs2 in program_set2.items():
+                        # skip if t1 isn't a node accepted by Lt
+                        if t2 not in And.accepted_rules(1):
+                            continue
+
+                        for p2 in programs2:
+
+                            lt = And()
+                            lt.add_child(p1)
+                            lt.add_child(p2)
+                            new_programs.append(lt)
+
+                            yield lt
+        return new_programs
+
 
 class Or(Node):
     def __init__(self):
@@ -351,6 +654,42 @@ class Or(Node):
             raise Exception('Or: Incomplete Program')
         return self.children[0].interpret(env) or self.children[1].interpret(env)
 
+    def grow(plist, size):
+        new_programs = []
+
+        # generates all combinations of cost of size 2 varying from 1 to size - 1
+        combinations = list(itertools.product(range(0, size), repeat=2))
+
+        for c in combinations:
+            # skip if the cost combination exceeds the limit
+            if c[0] + c[1] + 1 != size:
+                continue
+
+            # retrive bank of programs with costs c[0], c[1], and c[2]
+            program_set1 = plist.get_programs(c[0])
+            program_set2 = plist.get_programs(c[1])
+
+            for t1, programs1 in program_set1.items():
+                # skip if t1 isn't a node accepted by Lt
+                if t1 not in Or.accepted_rules(0):
+                    continue
+
+                for p1 in programs1:
+
+                    for t2, programs2 in program_set2.items():
+                        # skip if t1 isn't a node accepted by Lt
+                        if t2 not in Or.accepted_rules(1):
+                            continue
+
+                        for p2 in programs2:
+
+                            lt = Or()
+                            lt.add_child(p1)
+                            lt.add_child(p2)
+                            new_programs.append(lt)
+
+                            yield lt
+        return new_programs
 
 # class Map(Node):
 #     def __init__(self):
