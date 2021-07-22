@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-22 20:00:58
-LastEditTime: 2021-07-22 20:18:26
+LastEditTime: 2021-07-22 21:29:37
 LastEditors: Ethan Chen
 Description: 
 FilePath: \Sparcraft\script\dsl_bus.py
@@ -406,72 +406,72 @@ class Or(base_dsl.Or):
         return new_programs
 
 
-class Map(base_dsl.Map):
-    def __init__(self):
-        super().__init__()
+# class Map(base_dsl.Map):
+#     def __init__(self):
+#         super().__init__()
 
-    @staticmethod
-    def grow(plist, size):
-        new_programs = []
+#     @staticmethod
+#     def grow(plist, size):
+#         new_programs = []
 
-        # generates all combinations of cost of size 2 varying from 1 to size - 1
-        combinations = list(itertools.product(range(0, size), repeat=2))
+#         # generates all combinations of cost of size 2 varying from 1 to size - 1
+#         combinations = list(itertools.product(range(0, size), repeat=2))
 
-        for c in combinations:
-            # skip if the cost combination exceeds the limit
-            if c[0] + c[1] + 1 != size:
-                continue
+#         for c in combinations:
+#             # skip if the cost combination exceeds the limit
+#             if c[0] + c[1] + 1 != size:
+#                 continue
 
-            # retrive bank of programs with costs c[0], c[1], and c[2]
-            program_set1 = plist.get_programs(c[0])
-            program_set2 = plist.get_programs(c[1])
+#             # retrive bank of programs with costs c[0], c[1], and c[2]
+#             program_set1 = plist.get_programs(c[0])
+#             program_set2 = plist.get_programs(c[1])
 
-            for t1, programs1 in program_set1.items():
-                # skip if t1 isn't a node accepted by Lt
-                if t1 not in Map.accepted_rules(0):
-                    continue
+#             for t1, programs1 in program_set1.items():
+#                 # skip if t1 isn't a node accepted by Lt
+#                 if t1 not in Map.accepted_rules(0):
+#                     continue
 
-                for p1 in programs1:
+#                 for p1 in programs1:
 
-                    for t2, programs2 in program_set2.items():
+#                     for t2, programs2 in program_set2.items():
 
-                        # skip if t2 isn't a node accepted by Map
-                        if t2 not in Map.accepted_rules(1):
-                            continue
+#                         # skip if t2 isn't a node accepted by Map
+#                         if t2 not in Map.accepted_rules(1):
+#                             continue
 
-                        for p2 in programs2:
+#                         for p2 in programs2:
 
-                            m = Map()
-                            m.add_child(p1)
-                            m.add_child(p2)
-                            new_programs.append(m)
+#                             m = Map()
+#                             m.add_child(p1)
+#                             m.add_child(p2)
+#                             new_programs.append(m)
 
-                            yield m
-        return new_programs
+#                             yield m
+#         return new_programs
 
 
-class Function(base_dsl.Function):
-    def __init__(self):
-        super().__init__()
+# class Function(base_dsl.Function):
+#     def __init__(self):
+#         super().__init__()
 
-    def grow(plist, size):
-        new_programs = []
+#     def grow(plist, size):
+#         new_programs = []
 
-        program_set = plist.get_programs(size - 1)
+#         program_set = plist.get_programs(size - 1)
 
-        for t1, programs1 in program_set.items():
-            # skip if t1 isn't a node accepted by Lt
-            if t1 not in Function.accepted_rules(0):
-                continue
+#         for t1, programs1 in program_set.items():
+#             # skip if t1 isn't a node accepted by Lt
+#             if t1 not in Function.accepted_rules(0):
+#                 continue
 
-            for p1 in programs1:
+#             for p1 in programs1:
 
-                func = Function()
-                func.add_child(p1)
-                new_programs.append(func)
+#                 func = Function()
+#                 func.add_child(p1)
+#                 new_programs.append(func)
 
-                yield func
-        return new_programs
+#                 yield func
+#         return new_programs
 
 
 class StringConstant(base_dsl.StringConstant):

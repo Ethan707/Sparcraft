@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 15:34:52
-LastEditTime: 2021-07-22 21:03:36
+LastEditTime: 2021-07-22 21:42:17
 LastEditors: Ethan Chen
 Description: DSL for Sparcarft
 FilePath: \Sparcraft\script\base_DSL.py
@@ -352,52 +352,52 @@ class Or(Node):
         return self.children[0].interpret(env) or self.children[1].interpret(env)
 
 
-class Map(Node):
-    def __init__(self):
-        super(Map, self).__init__()
+# class Map(Node):
+#     def __init__(self):
+#         super(Map, self).__init__()
 
-        self.max_limit = 2
+#         self.max_limit = 2
 
-    @classmethod
-    def new(cls, func, l):
-        inst = cls()
-        inst.add_child(func)
-        inst.add_child(l)
+#     @classmethod
+#     def new(cls, func, l):
+#         inst = cls()
+#         inst.add_child(func)
+#         inst.add_child(l)
 
-        return inst
+#         return inst
 
-    def to_string(self):
-        if self.children[1] is None:
-            return 'map(' + self.children[0].to_string() + ", None)"
+#     def to_string(self):
+#         if self.children[1] is None:
+#             return 'map(' + self.children[0].to_string() + ", None)"
 
-        return 'map(' + self.children[0].to_string() + ", " + self.children[1].to_string() + ")"
+#         return 'map(' + self.children[0].to_string() + ", " + self.children[1].to_string() + ")"
 
-    def interpret(self, env):
-        # if list is None, then it tries to retrieve from local variables from a lambda function
-        if self.children[1] is None:
-            list_var = env[self.local][self.listname]
-            return list(map(self.children[0].interpret(env), list_var))
+#     def interpret(self, env):
+#         # if list is None, then it tries to retrieve from local variables from a lambda function
+#         if self.children[1] is None:
+#             list_var = env[self.local][self.listname]
+#             return list(map(self.children[0].interpret(env), list_var))
 
-        return list(map(self.children[0].interpret(env), self.children[1].interpret(env)))
+#         return list(map(self.children[0].interpret(env), self.children[1].interpret(env)))
 
 
-class Function(Node):
-    def __init__(self):
-        super(Function, self).__init__()
-        self.max_limit = 1
+# class Function(Node):
+#     def __init__(self):
+#         super(Function, self).__init__()
+#         self.max_limit = 1
 
-    @classmethod
-    def new(cls, var):
-        inst = cls()
-        inst.add_child(var)
+#     @classmethod
+#     def new(cls, var):
+#         inst = cls()
+#         inst.add_child(var)
 
-        return inst
+#         return inst
 
-    def to_string(self):
-        return "(lambda x : " + self.children[0].to_string() + ")"
+#     def to_string(self):
+#         return "(lambda x : " + self.children[0].to_string() + ")"
 
-    def interpret(self, env):
-        return lambda x: self.children[0].interpret_local_variables(env, x)
+#     def interpret(self, env):
+#         return lambda x: self.children[0].interpret_local_variables(env, x)
 
 
 class StringConstant(Node):
@@ -416,13 +416,13 @@ class StringConstant(Node):
 
     def to_string(self):
         if len(self.children) == 0:
-            raise Exception('VarScalar: Incomplete Program')
+            raise Exception('String: Incomplete Program')
 
         return str(self.children[0])
 
     def interpret(self, env):
         if len(self.children) == 0:
-            raise Exception('VarScalar: Incomplete Program')
+            raise Exception('String: Incomplete Program')
 
         return self.children[0]
 
@@ -443,13 +443,13 @@ class NumericConstant(Node):
 
     def to_string(self):
         if len(self.children) == 0:
-            raise Exception('VarScalar: Incomplete Program')
+            raise Exception('Num: Incomplete Program')
 
         return str(self.children[0])
 
     def interpret(self, env):
         if len(self.children) == 0:
-            raise Exception('VarScalar: Incomplete Program')
+            raise Exception('Num: Incomplete Program')
 
         return self.children[0]
 
@@ -750,46 +750,62 @@ Times.accepted_nodes = set([VarScalar.class_name(),
                             Plus.class_name(),
                             Times.class_name(),
                             Minus.class_name(),
-                            Sum.class_name()
-                            ])
+                            Sum.class_name(), LTD2_PlayerOverOpponent.class_name(), LTD2_Score.class_name(
+), LTD_PlayerOverOpponent.class_name(), LTD_Score.class_name()
+])
 Plus.accepted_nodes = set([VarScalar.class_name(),
                            NumericConstant.class_name(),
                            Plus.class_name(),
                            Times.class_name(),
                            Minus.class_name(),
-                           Sum.class_name()
-                           ])
+                           Sum.class_name(), LTD2_PlayerOverOpponent.class_name(), LTD2_Score.class_name(
+), LTD_PlayerOverOpponent.class_name(), LTD_Score.class_name()
+])
 Minus.accepted_nodes = set([VarScalar.class_name(),
                             NumericConstant.class_name(),
                             Plus.class_name(),
                             Times.class_name(),
                             Minus.class_name(),
-                            Sum.class_name()
-                            ])
-Argmax.accepted_nodes = set([Map.class_name(), VarList.class_name()])
-Argmin.accepted_nodes = set([Map.class_name(), VarList.class_name()])
+                            Sum.class_name(), LTD2_PlayerOverOpponent.class_name(), LTD2_Score.class_name(
+), LTD_PlayerOverOpponent.class_name(), LTD_Score.class_name()
+])
+
+Argmax.accepted_nodes = set([VarList.class_name(), AveDistancesFromMovePositionsToEnemyUnit.class_name(),
+                             MinDistancesFromMovePositionsToEnemyUnit.class_name(), MaxDistancesFromMovePositionsToEnemyUnit.class_name()])
+Argmin.accepted_nodes = set([VarList.class_name(), AveDistancesFromMovePositionsToEnemyUnit.class_name(),
+                             MinDistancesFromMovePositionsToEnemyUnit.class_name(), MaxDistancesFromMovePositionsToEnemyUnit.class_name()])
+
 ITE.accepted_nodes_bool = set([LT.class_name(),
-                               And.class_name(), Or.class_name()])
-ITE.accepted_nodes_block = set([ITE.class_name(), IT.class_name(), Argmax.class_name(), Argmin.class_name()])
-IT.accepted_nodes_bool = set([LT.class_name(),
-                              And.class_name(), Or.class_name()])
-IT.accepted_nodes_block = set([ITE.class_name(), IT.class_name(), Argmax.class_name(), Argmin.class_name()])
-LT.accepted_nodes = set([NumericConstant.class_name(),
+                               And.class_name(), Or.class_name(), HasAttackActions.class_name(), HasMoveActions.class_name(), HasReloadActions.class_name()])
+ITE.accepted_nodes_block = set([ITE.class_name(), IT.class_name(), Argmax.class_name(
+), Argmin.class_name(), Times.class_name(), Plus.class_name(), Minus.class_name()])
+
+IT.accepted_nodes_bool = set([LT.class_name(), And.class_name(), Or.class_name(
+), HasAttackActions.class_name(), HasMoveActions.class_name(), HasReloadActions.class_name()])
+IT.accepted_nodes_block = set([ITE.class_name(), IT.class_name(), Argmax.class_name(
+), Argmin.class_name(), Times.class_name(), Plus.class_name(), Minus.class_name()])
+
+LT.accepted_nodes = set([VarScalar.class_name(),
+                         NumericConstant.class_name(),
                          Plus.class_name(),
                          Times.class_name(),
                          Minus.class_name(),
-                         Sum.class_name(), VarScalar.class_name()])
+                         Sum.class_name(), LTD2_PlayerOverOpponent.class_name(), LTD2_Score.class_name(
+), LTD_PlayerOverOpponent.class_name(), LTD_Score.class_name()])
 
-Sum.accepted_nodes = set([Map.class_name(), VarList.class_name()])
-And.accepted_nodes = set([LT.class_name()])
-Or.accepted_nodes = set([LT.class_name()])
-Function.accepted_nodes = set([Minus.class_name(),
-                               Plus.class_name(),
-                               Times.class_name(),
-                               Sum.class_name(),
-                               Map.class_name()])
-Map.accepted_nodes_function = set([Function.class_name()])
-Map.accepted_nodes_list = set([VarList.class_name(), Map.class_name()])
+Sum.accepted_nodes = set([VarList.class_name(), AveDistancesFromMovePositionsToEnemyUnit.class_name(),
+                          MinDistancesFromMovePositionsToEnemyUnit.class_name(), MaxDistancesFromMovePositionsToEnemyUnit.class_name()])
+And.accepted_nodes = set([LT.class_name(), HasAttackActions.class_name(),
+                          HasMoveActions.class_name(), HasReloadActions.class_name()])
+Or.accepted_nodes = set([LT.class_name(), HasAttackActions.class_name(),
+                         HasMoveActions.class_name(), HasReloadActions.class_name()])
+# Function.accepted_nodes = set([Minus.class_name(),
+#                                Plus.class_name(),
+#                                Times.class_name(),
+#                                Sum.class_name(),
+#                                Map.class_name()])
+# Map.accepted_nodes_function = set([Function.class_name()])
+# Map.accepted_nodes_list = set([VarList.class_name(), Map.class_name()])
 
 
 Times.accepted_types = [Times.accepted_nodes, Times.accepted_nodes]
@@ -803,5 +819,9 @@ LT.accepted_types = [LT.accepted_nodes, LT.accepted_nodes]
 Sum.accepted_types = [Sum.accepted_nodes]
 And.accepted_types = [And.accepted_nodes, And.accepted_nodes]
 Or.accepted_types = [Or.accepted_nodes, Or.accepted_nodes]
-Function.accepted_types = [Function.accepted_nodes]
-Map.accepted_types = [Map.accepted_nodes_function, Map.accepted_nodes_list]
+
+ReturnPlayerAction.accepted_nodes = set([Argmax.class_name(), Argmin.class_name(), ITE.class_name(), IT.class_name(),
+                                         NumericConstant.class_name(), Plus.class_name(), Minus.class_name(), Times.class_name()])
+ReturnPlayerAction.accepted_types = [ReturnPlayerAction.accepted_nodes]
+# Function.accepted_types = [Function.accepted_nodes]
+# Map.accepted_types = [Map.accepted_nodes_function, Map.accepted_nodes_list]
