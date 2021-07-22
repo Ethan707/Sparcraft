@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 16:30:54
-LastEditTime: 2021-07-22 06:51:20
+LastEditTime: 2021-07-22 22:16:05
 LastEditors: Ethan Chen
 Description: Buttom up search for sparcraft
 FilePath: /Sparcraft/script/BUS.py
@@ -9,7 +9,7 @@ FilePath: /Sparcraft/script/BUS.py
 
 from Constant import ATTACK, MOVE, RELOAD
 from GameState import GameState, Unit
-from dsl_bus import *
+from base_dsl import *
 from evaluation import Evaluation
 
 
