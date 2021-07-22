@@ -1,13 +1,14 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 11:04:23
-LastEditTime: 2021-07-19 07:50:38
+LastEditTime: 2021-07-22 06:51:12
 LastEditors: Ethan Chen
 Description: Evaluation function for BUS
 FilePath: /Sparcraft/script/evaluation.py
 '''
 
 import os
+from script.Player_AttackClosest import AttackClosest
 from Game import Game
 from Player_Random import RandomPlayer
 from Player_AttackClosest import AttackClosest
@@ -114,8 +115,8 @@ class PlayWithRandomPlayer(Evaluation):
     def __init__(self, number_evaluations):
         super(PlayWithRandomPlayer, self).__init__()
         self.number_evaluations = number_evaluations
-        self.player = RandomPlayer()
-        # self.player = AttackWeakest()
+        # self.player = RandomPlayer()
+        self.player = AttackClosest()
 
     def eval(self, program):
         br = ProgramPlayer(program)

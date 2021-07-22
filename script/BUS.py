@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 16:30:54
-LastEditTime: 2021-07-19 06:13:15
+LastEditTime: 2021-07-22 06:51:20
 LastEditors: Ethan Chen
 Description: Buttom up search for sparcraft
 FilePath: /Sparcraft/script/BUS.py
@@ -9,7 +9,7 @@ FilePath: /Sparcraft/script/BUS.py
 
 from Constant import ATTACK, MOVE, RELOAD
 from GameState import GameState, Unit
-from DSL import *
+from dsl_bus import *
 from evaluation import Evaluation
 
 
@@ -98,33 +98,6 @@ class ButtomUpSearch():
 
         return set_of_initial_programs
 
-    def init_env(self, unit_state: Unit, game_state: GameState):
-        enemy = game_state.getEnemyFromUnit(unit_state)
-
-        env = {}
-        env['game_state'] = game_state
-        env['unit_state'] = unit_state
-        env['attack_actions'] = unit_state.getActionsByType(ATTACK)
-        env['move_actions'] = unit_state.getActionsByType(MOVE)
-        env['reload_actions'] = unit_state.getActionsByType(RELOAD)
-
-        env['num_attacks'] = len(env['attack_actions'])
-        env['num_moves'] = len(env['move_actions'])
-        env['num_reload'] = len(env['reload_actions'])
-
-        # For move
-        env['moves_distance'] = unit_state.getMoveDistanceList()
-        # destination enemy that could attack
-
-        # For Attack
-        env['enemy_distance'] = game_state.getEnemyDistanceFromUnit(unit_state)
-        env['enemy_hp'] = [i.hp for i in enemy]
-        env['enemy_range'] = [i.range for i in enemy]
-        env['enemy_damage'] = [i.damage for i in enemy]
-        env['enemy_dpf'] = [i.dpf for i in enemy]
-
-        return env
-
     def grow(self, operations, size):
         new_programs = []
         for op in operations:
@@ -184,29 +157,29 @@ class ButtomUpSearch():
             for p in self.grow(operations, current_size):
                 number_programs_evaluated += 1
                 number_evaluations_bound += 1
-
-                if collect_library:
-                    score = 0
-                else:
-                    if use_triage:
-                        # print("Begin triage")
-                        # print(p.to_string())
-                        score, _, number_matches_played = eval_function.eval_triage(p, best_winrate)
-                        # if score > 0:
-                        # print(score, number_matches_played)
+                print(p.to_string())
+                if type(p) != ReturnPlayerAction:
+                    print("Yes")
+                    if collect_library:
+                        score = 0
                     else:
-                        score, _, number_matches_played = eval_function.eval(p)
-                    number_games_played += number_matches_played
+                        if use_triage:
+                            score, _, number_matches_played = eval_function.eval_triage(p, best_winrate)
+                            # if score > 0:
+                            # print(score, number_matches_played)
+                        else:
+                            score, _, number_matches_played = eval_function.eval(p)
+                        number_games_played += number_matches_played
 
-                if best_program is None or score > best_winrate:
-                    best_winrate = score
-                    best_program = p
-                    # print("******************************Found************************************")
-                    print(p.to_string())
+                    if best_program is None or score > best_winrate:
+                        best_winrate = score
+                        best_program = p
+                        print("Found")
+                        print(p.to_string())
 
-            current_size += 1
+                current_size += 1
 
-        if collect_library:
-            return self.plist.plist
+            if collect_library:
+                return self.plist.plist
 
         return best_winrate, best_program, number_programs_evaluated, number_games_played
