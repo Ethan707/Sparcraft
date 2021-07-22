@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 11:04:23
-LastEditTime: 2021-07-19 02:43:46
+LastEditTime: 2021-07-19 07:50:38
 LastEditors: Ethan Chen
 Description: Evaluation function for BUS
 FilePath: /Sparcraft/script/evaluation.py
@@ -10,6 +10,8 @@ FilePath: /Sparcraft/script/evaluation.py
 import os
 from Game import Game
 from Player_Random import RandomPlayer
+from Player_AttackClosest import AttackClosest
+from Player_AttackWeakest import AttackWeakest
 from Program_Player import ProgramPlayer
 
 
@@ -57,12 +59,14 @@ class Evaluation():
         try:
             game = Game(p1, p2, num_exp=n)
             game.run_experiment()
+
             result = game.get_result()
 
             br_victories = result[1]
             player_victories = result[2]
 
-        except Exception:
+        except Exception as e:
+            game.kill()
             return None, None, True
 
         return player_victories, br_victories, False
@@ -91,7 +95,7 @@ class Evaluation():
             if error:
                 return 0.0, error, number_matches_played
 
-            print("Successful")
+            # print("Successful")
             if br_victories is None:
                 br_victories = br_victories_local
             else:
@@ -111,6 +115,7 @@ class PlayWithRandomPlayer(Evaluation):
         super(PlayWithRandomPlayer, self).__init__()
         self.number_evaluations = number_evaluations
         self.player = RandomPlayer()
+        # self.player = AttackWeakest()
 
     def eval(self, program):
         br = ProgramPlayer(program)

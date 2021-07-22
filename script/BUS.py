@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 16:30:54
-LastEditTime: 2021-07-19 02:45:38
+LastEditTime: 2021-07-19 06:13:15
 LastEditors: Ethan Chen
 Description: Buttom up search for sparcraft
 FilePath: /Sparcraft/script/BUS.py
@@ -189,9 +189,11 @@ class ButtomUpSearch():
                     score = 0
                 else:
                     if use_triage:
+                        # print("Begin triage")
+                        # print(p.to_string())
                         score, _, number_matches_played = eval_function.eval_triage(p, best_winrate)
-                        if score > 0:
-                            print(score, number_matches_played)
+                        # if score > 0:
+                        # print(score, number_matches_played)
                     else:
                         score, _, number_matches_played = eval_function.eval(p)
                     number_games_played += number_matches_played
@@ -199,7 +201,7 @@ class ButtomUpSearch():
                 if best_program is None or score > best_winrate:
                     best_winrate = score
                     best_program = p
-                    print("Found")
+                    # print("******************************Found************************************")
                     print(p.to_string())
 
             current_size += 1

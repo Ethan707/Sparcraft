@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 12:40:17
-LastEditTime: 2021-07-19 02:42:22
+LastEditTime: 2021-07-21 13:12:45
 LastEditors: Ethan Chen
 Description: 
 FilePath: /Sparcraft/script/main.py
@@ -13,20 +13,21 @@ from DSL import *
 
 if __name__ == '__main__':
     # open Sparcraft as subprocess
-    # game = Game(NOKDPS(0), AttackWeakest(1))
-    # game.print_result()
-    bound = 100
-    use_triage = True
-    eval_function = PlayWithRandomPlayer(10)
-    algorithm = ButtomUpSearch('', '')
-    algorithm.search(
-        bound,
-        [Times, Plus, Minus, Argmax, Argmin, IT, ITE, LT, Equal, Sum, And, Or, Not, Map, Function],
-        [-1, 0, 1, 2, 10],
-        ['x', 'y', 'z'],
-        ['num_attacks', 'num_moves', 'num_reload'],
-        ['moves_distance', 'enemy_distance', 'enemy_hp', 'enemy_range', 'enemy_damage', 'enemy_dpf'],
-        [],
-        eval_function,
-        use_triage
-    )
+    game = Game(NOKDPS(), AttackWeakest(), num_exp=1)
+    game.run_experiment()
+    game.print_result()
+    # bound = 10
+    # use_triage = False
+    # eval_function = PlayWithRandomPlayer(20)
+    # algorithm = ButtomUpSearch('', '')
+    # algorithm.search(
+    #     bound,
+    #     [Times, Plus, Minus, Argmax, Argmin, IT, ITE, LT, Equal, Sum, And, Or, Not, Map, Function],
+    #     [0, 1, 10],
+    #     ['x', 'y', 'z'],
+    #     ['num_attacks', 'num_moves', 'num_reload'],
+    #     ['moves_distance', 'enemy_distance', 'enemy_hp', 'enemy_range', 'enemy_damage', 'enemy_dpf'],
+    #     [],
+    #     eval_function,
+    #     use_triage
+    # )

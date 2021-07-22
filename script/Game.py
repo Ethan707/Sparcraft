@@ -21,7 +21,7 @@ class Game:
         self.num_exp = num_exp
         self.winner = [0]*3  # player 0 | player 1 | draw
         self.execute_file = execute_file
-        self.process = Popen([self.execute_file, self.exp_file, self.num_exp], stdin=PIPE, stdout=PIPE)
+        self.process = Popen([self.execute_file, self.exp_file, str(self.num_exp)], stdin=PIPE, stdout=PIPE)
         self.state = GameState()
 
         self.player_0.set_player_id(0)
@@ -81,12 +81,13 @@ class Game:
                     state.player_unit[unitIndex].moves.append([moveType, moveIndex, position_x, position_y])
 
                 except Exception as e:
-                    print("Error:", ' '.join(message))
+                    # print("Error:", ' '.join(message))
                     print(e)
             else:
                 print("Unknown:", ' '.join(message))
+                # self.process.kill()
                 raise Exception
-            message = self.processMessage(self.process)
+            message = self.processMessage()
         # return game
 
     def returnMoves(self,  decision: list) -> None:
@@ -102,14 +103,16 @@ class Game:
         self.process.stdin.flush()
 
     def init_experiment(self):
-        message = self.processMessage(self.process)
+        message = self.processMessage()
         # Check program started
         # Start Message: numState
         assert message[0].isdigit() and int(message[0]) == self.num_exp
-        print("SparCraft starts successfully")
+        # print(message[0])
+        # print("SparCraft starts successfully")
 
     def run_experiment(self):
         self.init_experiment()
+        # print(self.num_exp)
         for i in range(self.num_exp):
             end = False
             while not end:
@@ -128,6 +131,8 @@ class Game:
             assert player_message[0] == "PlayerID" and player_message[1].isdigit()
             self.state.player_id = int(player_message[1])
             self.processGameState(self.state)
+            print(len(self.state.player_unit))
+
             if self.state.player_id == 0:
                 decision = self.player_0.generate(self.state)
             else:
@@ -151,6 +156,7 @@ class Game:
 
         else:
             print("Error: ", ' '.join(message))
+            self.process.kill()
             raise Exception
         return True
 
@@ -163,3 +169,6 @@ class Game:
 
     def clear(self):
         pass
+
+    def kill(self):
+        self.process.kill()
