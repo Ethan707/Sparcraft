@@ -1,14 +1,14 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 11:04:23
-LastEditTime: 2021-07-22 06:51:12
+LastEditTime: 2021-07-25 07:11:36
 LastEditors: Ethan Chen
 Description: Evaluation function for BUS
 FilePath: /Sparcraft/script/evaluation.py
 '''
 
 import os
-from script.Player_AttackClosest import AttackClosest
+# from Player_AttackClosest import AttackClosest
 from Game import Game
 from Player_Random import RandomPlayer
 from Player_AttackClosest import AttackClosest
@@ -67,7 +67,7 @@ class Evaluation():
             player_victories = result[2]
 
         except Exception as e:
-            game.kill()
+            print(e)
             return None, None, True
 
         return player_victories, br_victories, False

@@ -11,6 +11,7 @@ PLAYER_TWO = 1
 
 EXP_FILE = '../sample_experiment/exp.txt'
 EXE_FILE = '../bin/SparCraft'
+# /home/ethan/workspace/Sparcraft/bin/SparCraft
 
 
 class Game:
@@ -21,7 +22,8 @@ class Game:
         self.num_exp = num_exp
         self.winner = [0]*3  # player 0 | player 1 | draw
         self.execute_file = execute_file
-        self.process = Popen([self.execute_file, self.exp_file, str(self.num_exp)], stdin=PIPE, stdout=PIPE)
+        self.process = Popen(['../bin/SparCraft', '../sample_experiment/exp.txt',
+                             str(self.num_exp)], stdin=PIPE, stdout=PIPE)
         self.state = GameState()
 
         self.player_0.set_player_id(0)
@@ -37,7 +39,7 @@ class Game:
         '''
         return self.process.stdout.readline().decode('utf-8').replace('\n', '').replace('\r', '').split(split)
 
-    def processGameState(self,  state: GameState) -> None:
+    def processGameState(self, state: GameState) -> None:
         message = self.processMessage()
 
         while message[0] != "End":
@@ -85,6 +87,7 @@ class Game:
                     print(e)
             else:
                 print("Unknown:", ' '.join(message))
+                print(message)
                 # self.process.kill()
                 raise Exception
             message = self.processMessage()
@@ -114,6 +117,7 @@ class Game:
         self.init_experiment()
         # print(self.num_exp)
         for i in range(self.num_exp):
+            # print(self.num_exp)
             end = False
             while not end:
                 end = self.run_round()
@@ -131,7 +135,7 @@ class Game:
             assert player_message[0] == "PlayerID" and player_message[1].isdigit()
             self.state.player_id = int(player_message[1])
             self.processGameState(self.state)
-            print(len(self.state.player_unit))
+            # print(len(self.state.player_unit))
 
             if self.state.player_id == 0:
                 decision = self.player_0.generate(self.state)

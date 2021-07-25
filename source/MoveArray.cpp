@@ -75,7 +75,7 @@ void MoveArray::shuffleMoveActions()
 const Action &MoveArray::getMove(const size_t &unit, const size_t &move) const
 {
     assert(_moves[unit][(size_t)move].unit() != 255);
-    std::cout << "Error" << std::endl;
+    // std::cout << "Error" << std::endl;
 
     return _moves[unit][(size_t)move];
 }

@@ -1,10 +1,10 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 15:34:52
-LastEditTime: 2021-07-22 22:15:36
+LastEditTime: 2021-07-25 09:53:47
 LastEditors: Ethan Chen
 Description: DSL for Sparcarft
-FilePath: \Sparcraft\script\base_DSL.py
+FilePath: /Sparcraft/script/base_dsl.py
 '''
 import numpy as np
 from GameState import *
@@ -849,9 +849,8 @@ class VarScalar(Node):
 
 class ReturnPlayerAction(Node):
     def __init__(self):
-        super(VarScalar, self).__init__()
+        super(ReturnPlayerAction, self).__init__()
         self.max_limit = 1
-        self.size = 0
 
     @classmethod
     def new(cls, var):
@@ -864,7 +863,7 @@ class ReturnPlayerAction(Node):
         if len(self.children) == 0:
             raise Exception('return player action: Incomplete Program')
 
-        return self.children[0]
+        return 'action_to_return = actions['+self.children[0].to_string()+']'
 
     def set_unit_state(self, env, unit: Unit):
         state = env['state']
@@ -902,6 +901,25 @@ class ReturnPlayerAction(Node):
                 result.append(index_unit_action)
         return result
 
+    def grow(plist, size):
+        new_programs = []
+
+        program_set = plist.get_programs(size - 1)
+
+        for t1, programs1 in program_set.items():
+            # skip if t1 isn't a node accepted by Lt
+            if t1 not in ReturnPlayerAction.accepted_rules(0):
+                continue
+
+            for p1 in programs1:
+
+                assign = ReturnPlayerAction()
+                assign.add_child(p1)
+                new_programs.append(assign)
+
+                yield assign
+        return new_programs
+
 
 class LTD_Score(Node):
     def __init__(self):
@@ -914,7 +932,7 @@ class LTD_Score(Node):
     def interpret(self, env):
         state = env['state']
         currentLTD = 0
-        for unit in state.player_units:
+        for unit in state.player_unit:
             currentLTD += unit.hp*unit.dpf
 
         return currentLTD
@@ -931,7 +949,7 @@ class LTD2_Score(Node):
     def interpret(self, env):
         state = env['state']
         currentLTD2 = 0
-        for unit in state.player_units:
+        for unit in state.player_unit:
             currentLTD2 += np.sqrt(unit.hp)*unit.dpf
 
         return currentLTD2
@@ -949,9 +967,9 @@ class LTD_PlayerOverOpponent(Node):
         state = env['state']
         playerLTD = 0
         enemyLTD = 0
-        for unit in state.player_units:
+        for unit in state.player_unit:
             playerLTD += unit.hp*unit.dpf
-        for unit in state.enemy_units:
+        for unit in state.enemy_unit:
             enemyLTD += unit.hp*unit.dpf
         return playerLTD-enemyLTD
 
@@ -968,9 +986,9 @@ class LTD2_PlayerOverOpponent(Node):
         state = env['state']
         playerLTD2 = 0
         enemyLTD2 = 0
-        for unit in state.player_units:
+        for unit in state.player_unit:
             playerLTD2 += unit.hp*unit.dpf
-        for unit in state.enemy_units:
+        for unit in state.enemy_unit:
             enemyLTD2 += unit.hp*unit.dpf
         return playerLTD2-enemyLTD2
 

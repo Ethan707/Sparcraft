@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 16:30:54
-LastEditTime: 2021-07-22 22:16:05
+LastEditTime: 2021-07-25 07:08:21
 LastEditors: Ethan Chen
 Description: Buttom up search for sparcraft
 FilePath: /Sparcraft/script/BUS.py
@@ -90,6 +90,7 @@ class ButtomUpSearch():
 
         for i in functions_scalars:
             p = i()
+            # print(p.to_string())
 
             # if self.detect_equivalence and self.has_equivalent(p):
             #     continue
@@ -157,9 +158,10 @@ class ButtomUpSearch():
             for p in self.grow(operations, current_size):
                 number_programs_evaluated += 1
                 number_evaluations_bound += 1
-                print(p.to_string())
                 if type(p) != ReturnPlayerAction:
-                    print("Yes")
+
+                    # print(p.to_string())
+                    # print("Yes")
                     if collect_library:
                         score = 0
                     else:
@@ -177,7 +179,7 @@ class ButtomUpSearch():
                         print("Found")
                         print(p.to_string())
 
-                current_size += 1
+            current_size += 1
 
             if collect_library:
                 return self.plist.plist

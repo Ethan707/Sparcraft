@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 12:40:17
-LastEditTime: 2021-07-22 07:16:50
+LastEditTime: 2021-07-25 07:29:36
 LastEditors: Ethan Chen
 Description: 
 FilePath: /Sparcraft/script/main.py
@@ -14,15 +14,17 @@ from simulated_annealing import *
 
 if __name__ == '__main__':
     # open Sparcraft as subprocess
-    # game = Game(NOKDPS(0), AttackWeakest(1))
+    # game = Game(NOKDPS(), AttackWeakest())
+    # game.run_experiment()
     # game.print_result()
-    bound = 100
+
+    bound = 10
     use_triage = True
     eval_function = PlayWithRandomPlayer(10)
     algorithm = ButtomUpSearch('', '')
     algorithm.search(
         bound,
-        [Times, Plus, Minus, Argmax, Argmin, IT, ITE, LT, Sum,  ReturnPlayerAction],
+        [ReturnPlayerAction, Times, Plus, Minus, Argmax, Argmin, IT, ITE, LT, Sum],
         [0, 5, 50],
         ['y'],
         ['num_attacks', 'num_moves', 'num_reload'],
