@@ -1,10 +1,10 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 11:04:23
-LastEditTime: 2021-07-26 20:37:41
+LastEditTime: 2021-07-26 05:58:59
 LastEditors: Ethan Chen
 Description: Evaluation function for BUS
-FilePath: \Sparcraft\script\evaluation.py
+FilePath: /Sparcraft/script/evaluation.py
 '''
 
 import os
@@ -165,9 +165,14 @@ class Evaluation():
 
         br_victories = None
         error = None
-        has_error = self.validate_on_records(br)
-        if has_error:
-            0.0, True, number_matches_played
+        for i in range(20):
+            data = [i, br]
+            has_error = self.validate_parallel(data)
+            if has_error:
+                print("Error Validation")
+                return 0.0, True, number_matches_played
+            else:
+                print("Pass")
 
         for i in range(len(number_matches_by_layer)):
             _, br_victories_local, error = self.play_n_matches(number_matches_by_layer[i], br, player)
