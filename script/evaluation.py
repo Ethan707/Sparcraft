@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 11:04:23
-LastEditTime: 2021-07-25 07:11:36
+LastEditTime: 2021-07-26 01:23:46
 LastEditors: Ethan Chen
 Description: Evaluation function for BUS
 FilePath: /Sparcraft/script/evaluation.py
@@ -14,6 +14,8 @@ from Player_Random import RandomPlayer
 from Player_AttackClosest import AttackClosest
 from Player_AttackWeakest import AttackWeakest
 from Program_Player import ProgramPlayer
+from Player_NOKDPS import NOKDPS
+from Player_AttackWeakestNOK import AttackWeakestNOK
 
 
 class Evaluation():
@@ -116,7 +118,7 @@ class PlayWithRandomPlayer(Evaluation):
         super(PlayWithRandomPlayer, self).__init__()
         self.number_evaluations = number_evaluations
         # self.player = RandomPlayer()
-        self.player = AttackClosest()
+        self.player = AttackWeakestNOK()
 
     def eval(self, program):
         br = ProgramPlayer(program)

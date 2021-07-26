@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 15:34:52
-LastEditTime: 2021-07-25 09:53:47
+LastEditTime: 2021-07-26 00:20:12
 LastEditors: Ethan Chen
 Description: DSL for Sparcarft
 FilePath: /Sparcraft/script/base_dsl.py
@@ -896,7 +896,10 @@ class ReturnPlayerAction(Node):
         for unit in units:
             if len(unit.moves) > 0:
                 self.set_unit_state(env, unit)
-                index_unit_action = self.children.interpret(env)
+                index_unit_action = int(self.children[0].interpret(env))
+                # print(index_unit_action)
+                # print(type(index_unit_action))
+                # print(0 <= index_unit_action < len(unit.moves))
                 assert isinstance(index_unit_action, int) and 0 <= index_unit_action < len(unit.moves)
                 result.append(index_unit_action)
         return result
@@ -1182,3 +1185,5 @@ ReturnPlayerAction.accepted_nodes = set([Argmax.class_name(), Argmin.class_name(
 ReturnPlayerAction.accepted_types = [ReturnPlayerAction.accepted_nodes]
 # Function.accepted_types = [Function.accepted_nodes]
 # Map.accepted_types = [Map.accepted_nodes_function, Map.accepted_nodes_list]
+Node.accepted_types = [set([ITE.class_name(), Argmax.class_name(), Argmin.class_name(),
+                            Sum.class_name(), ReturnPlayerAction.class_name()])]

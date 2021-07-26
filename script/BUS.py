@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 16:30:54
-LastEditTime: 2021-07-25 07:08:21
+LastEditTime: 2021-07-25 12:01:58
 LastEditors: Ethan Chen
 Description: Buttom up search for sparcraft
 FilePath: /Sparcraft/script/BUS.py
@@ -158,9 +158,9 @@ class ButtomUpSearch():
             for p in self.grow(operations, current_size):
                 number_programs_evaluated += 1
                 number_evaluations_bound += 1
-                if type(p) != ReturnPlayerAction:
+                if type(p) == ReturnPlayerAction:
 
-                    # print(p.to_string())
+                    print(p.to_string())
                     # print("Yes")
                     if collect_library:
                         score = 0

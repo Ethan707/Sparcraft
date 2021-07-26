@@ -123,6 +123,15 @@ class Game:
                 end = self.run_round()
                 self.state.clear()
 
+    def check_available(self, decision):
+        i = 0
+        for unit in self.state.player_unit:
+            if len(unit.moves) > 0:
+                assert decision[i] >= 0
+                assert decision[i] < len(unit.moves)
+                assert isinstance(decision[i], int)
+                i += 1
+
     def run_round(self):
         # three occasions:
         # 1.gamestate infomation
@@ -141,6 +150,7 @@ class Game:
                 decision = self.player_0.generate(self.state)
             else:
                 decision = self.player_1.generate(self.state)
+            self.check_available(decision)
             # print(decision)
             # Return the move to sparcraft
             self.returnMoves(decision)

@@ -1,10 +1,10 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-22 04:32:29
-LastEditTime: 2021-07-22 21:09:56
+LastEditTime: 2021-07-26 00:32:26
 LastEditors: Ethan Chen
 Description: 
-FilePath: \Sparcraft\script\simulated_annealing.py
+FilePath: /Sparcraft/script/simulated_annealing.py
 '''
 
 from base_dsl import *
@@ -159,7 +159,6 @@ class SimulatedAnnealing():
                string_constant_values,
                variables_scalar,
                variables_list,
-               variables_scalar_from_array,
                functions_scalars,
                eval_function,
                use_triage,
@@ -220,6 +219,7 @@ class SimulatedAnnealing():
                 return current_program, current_score
 
             if best_program is None or current_score > best_score:
+
                 best_score = current_score
                 best_program = current_program
 
@@ -233,6 +233,7 @@ class SimulatedAnnealing():
                 copy_program = copy.deepcopy(current_program)
 
                 mutation = self.mutate(copy_program)
+                print(mutation.to_string())
                 if use_triage:
                     next_score, _, number_matches_played = self.eval_function.eval_triage(mutation, best_score)
                 else:
