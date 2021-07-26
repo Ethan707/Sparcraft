@@ -1,10 +1,10 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 15:34:52
-LastEditTime: 2021-07-26 00:20:12
+LastEditTime: 2021-07-26 20:33:45
 LastEditors: Ethan Chen
 Description: DSL for Sparcarft
-FilePath: /Sparcraft/script/base_dsl.py
+FilePath: \Sparcraft\script\base_DSL.py
 '''
 import numpy as np
 from GameState import *
@@ -897,9 +897,6 @@ class ReturnPlayerAction(Node):
             if len(unit.moves) > 0:
                 self.set_unit_state(env, unit)
                 index_unit_action = int(self.children[0].interpret(env))
-                # print(index_unit_action)
-                # print(type(index_unit_action))
-                # print(0 <= index_unit_action < len(unit.moves))
                 assert isinstance(index_unit_action, int) and 0 <= index_unit_action < len(unit.moves)
                 result.append(index_unit_action)
         return result

@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 11:04:23
-LastEditTime: 2021-07-26 17:43:15
+LastEditTime: 2021-07-26 20:37:41
 LastEditors: Ethan Chen
 Description: Evaluation function for BUS
 FilePath: \Sparcraft\script\evaluation.py
@@ -10,6 +10,7 @@ FilePath: \Sparcraft\script\evaluation.py
 import os
 # from Player_AttackClosest import AttackClosest
 from Game import Game
+from GameState import *
 from Player_Random import RandomPlayer
 from Player_AttackClosest import AttackClosest
 from Player_AttackWeakest import AttackWeakest
@@ -75,45 +76,81 @@ class Evaluation():
 
         return player_victories, br_victories, False
 
-    def validate_on_record(self, p1, p2):
+    @staticmethod
+    def validate_parallel(data):
+        index = data[0]
+        program = data[1]
+
+        game = GameState()
+        path_name = '../game_record/'
+        file_name = path_name+'record_'+str(index+1)+'.txt'
+        try:
+            with open(file_name) as f:
+                lines = f.readlines()
+                for line in lines:
+                    message = line.split(' ')
+                    if message[0] == 'PlayerID':
+                        game.player_id = int(message[1])
+                    elif message[0] == 'Time':
+                        game.setTime(int(message[1]))
+                    elif message[0] == 'Unit':
+                        player = int(message[1])
+                        hp = int(message[2])
+                        firstTimeFree = int(message[3])
+                        position = [int(message[4]), int(message[5])]
+                        range = int(message[6])
+                        damage = int(message[7])
+                        dpf = float(message[8])
+                        # set up the unit
+                        unit = Unit(position, hp, range, damage, dpf)
+                        # add unit to game state
+
+                        if player == game.player_id:
+                            game.addUnit(unit)
+                        else:
+                            game.addEnemy(unit)
+                    elif message[0] == 'Move':
+                        unitIndex = int(message[1])
+                        player = int(message[2])
+
+                        moveType = int(message[3])
+                        moveIndex = int(message[4])
+                        position_x = int(message[5])
+                        position_y = int(message[6])
+                        # set up the move
+                        game.player_unit[unitIndex].moves.append([moveType, moveIndex, position_x, position_y])
+                    elif message[0] == 'End':
+                        decision = program.generate(game)
+                        i = 0
+                        for unit in game.player_unit:
+                            if len(unit.moves) > 0:
+                                assert decision[i] >= 0
+                                assert decision[i] < len(unit.moves)
+                                assert isinstance(decision[i], int)
+                                i += 1
+                        game.clear()
+        except Exception:
+            return True
+        return False
+
+    def validate_on_records(self, program):
 
         self.ncpus = int(os.environ.get('SLURM_CPUS_PER_TASK', default=4))
 
-        br_victories = 0
-        player_victories = 0
-
-        params = []
-        for i in range(n):
-            if i % 2 == 0:
-                params.append((p1, p2))
-            else:
-                params.append((p2, p1))
-
-        Evaluation.number_matches_played = 0
-
         try:
             with ProcessPoolExecutor(max_workers=self.ncpus) as executor:
-                args = ((player1, player2) for player1, player2 in params)
-                results = executor.map(Evaluation.play_match_parallel, args)
-            for result in results:
-                is_over = result[0]
-                who_won = result[1]
-                player1 = result[2]
-                player2 = result[3]
-
-                if is_over:
-                    if who_won == 1 and p1.get_name() == player1.get_name():
-                        br_victories += 1
-                    elif who_won == 2 and p1.get_name() == player2.get_name():
-                        br_victories += 1
-                    else:
-                        player_victories += 1
+                args = ((index, program) for index in range(20))
+                results = executor.map(Evaluation.validate_parallel, args)
+            for has_error in results:
+                if has_error:
+                    return True
         except Exception:
-            return None, None, True
+            return True
 
-        return player_victories, br_victories, False
+        return False
 
     def eval(self, br, player):
+
         _, br_victories, error = self.play_n_matches(self.number_evaluations, br, player)
 
         if error:
@@ -128,6 +165,9 @@ class Evaluation():
 
         br_victories = None
         error = None
+        has_error = self.validate_on_records(br)
+        if has_error:
+            0.0, True, number_matches_played
 
         for i in range(len(number_matches_by_layer)):
             _, br_victories_local, error = self.play_n_matches(number_matches_by_layer[i], br, player)
