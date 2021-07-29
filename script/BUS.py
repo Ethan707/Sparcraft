@@ -158,6 +158,7 @@ class ButtomUpSearch():
             best_program = self.best_program
             best_winrate = self.best_winrate
             p = self.p
+            print(best_program.to_string())
             print(p.to_string())
             if use_triage:
                 score, _, number_matches_played = eval_function.eval_triage(p, best_winrate)

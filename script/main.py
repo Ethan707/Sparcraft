@@ -1,10 +1,22 @@
+'''
+Author: Ethan Chen
+Date: 2021-07-29 04:00:05
+LastEditTime: 2021-07-29 04:00:33
+LastEditors: Ethan Chen
+Description: 
+FilePath: /script/main.py
+'''
 
 from Game import *
 from BUS import *
 from evaluation import *
 from base_dsl import *
 from simulated_annealing import *
+import faulthandler
+
+
 if __name__ == '__main__':
+    faulthandler.enable()
     p = ReturnPlayerAction.new(
         Argmin.new(
             MaxDistancesFromMovePositionsToEnemyUnit()
@@ -32,6 +44,7 @@ if __name__ == '__main__':
 
     bound = 10
     use_triage = True
+    save_data = True
     eval_function = PlayWithRandomPlayer(10)
     algorithm = ButtomUpSearch('', '')
     algorithm.search(
@@ -52,7 +65,9 @@ if __name__ == '__main__':
          MinDistancesFromMovePositionsToEnemyUnit,
          MaxDistancesFromMovePositionsToEnemyUnit],
         eval_function,
-        use_triage, load_data_test=True
+        use_triage,
+        load_data_test=False,
+        save_data=save_data
     )
 
     # algorithm = SimulatedAnnealing('', '')
