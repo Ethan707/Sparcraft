@@ -174,27 +174,27 @@ class Evaluation():
             else:
                 print("Pass")
 
-        # for i in range(len(number_matches_by_layer)):
-        #     _, br_victories_local, error = self.play_n_matches(number_matches_by_layer[i], br, player)
+        for i in range(len(number_matches_by_layer)):
+            _, br_victories_local, error = self.play_n_matches(number_matches_by_layer[i], br, player)
 
-        #     number_matches_played += number_matches_by_layer[i]
+            number_matches_played += number_matches_by_layer[i]
 
-        #     if error:
-        #         return 0.0, error, number_matches_played
+            if error:
+                return 0.0, error, number_matches_played
 
-        #     # print("Successful")
-        #     if br_victories is None:
-        #         br_victories = br_victories_local
-        #     else:
-        #         br_victories += br_victories_local
+            # print("Successful")
+            if br_victories is None:
+                br_victories = br_victories_local
+            else:
+                br_victories += br_victories_local
 
-        #     if (i + 1) == len(number_matches_by_layer):
-        #         return br_victories/number_matches_played, error, number_matches_played
+            if (i + 1) == len(number_matches_by_layer):
+                return br_victories/number_matches_played, error, number_matches_played
 
-        #     if br_victories / number_matches_played + (br_victories / number_matches_played) * self.relative_slack_triage[i] < current_best_score:
-        #         return br_victories / number_matches_played, error, number_matches_played
-        return 0.0, True, number_matches_played
-        # return br_victories / number_matches_played, error, number_matches_played
+            if br_victories / number_matches_played + (br_victories / number_matches_played) * self.relative_slack_triage[i] < current_best_score:
+                return br_victories / number_matches_played, error, number_matches_played
+        # return 0.0, True, number_matches_played
+        return br_victories / number_matches_played, error, number_matches_played
 
 
 class PlayWithRandomPlayer(Evaluation):
@@ -202,7 +202,7 @@ class PlayWithRandomPlayer(Evaluation):
         super(PlayWithRandomPlayer, self).__init__()
         self.number_evaluations = number_evaluations
         # self.player = RandomPlayer()
-        self.player = AttackWeakestNOK()
+        self.player = AttackWeakest()
 
     def eval(self, program):
         br = ProgramPlayer(program)

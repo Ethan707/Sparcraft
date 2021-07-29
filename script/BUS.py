@@ -11,6 +11,7 @@ from Constant import ATTACK, MOVE, RELOAD
 from GameState import GameState, Unit
 from base_dsl import *
 from evaluation import Evaluation
+import pickle
 
 
 class ProgramList():
@@ -114,6 +115,26 @@ class ButtomUpSearch():
     def get_closed_list(self):
         return self.closed_list
 
+    def save(self):
+        with open('data.txt', 'wb') as f:
+            pickle.dump(self.closed_list, f, -1)
+            pickle.dump(self.programs_outputs, f, -1)
+            pickle.dump(self.plist, f, -1)
+            pickle.dump(self.best_program, f, -1)
+            pickle.dump(self.best_winrate, f, -1)
+            pickle.dump(self.current_size, f, -1)
+            pickle.dump(self.p, f, -1)
+
+    def load_data(self):
+        with open('data.txt', 'rb') as f:
+            self.closed_list = pickle.load(f)
+            self.programs_outputs = pickle.load(f)
+            self.plist = pickle.load(f)
+            self.best_program = pickle.load(f)
+            self.best_winrate = pickle.load(f)
+            self.current_size = pickle.load(f)
+            self.p = pickle.load(f)
+
     def search(self,
                bound,
                operations,
@@ -124,64 +145,85 @@ class ButtomUpSearch():
                functions_scalars,
                eval_function: Evaluation,
                use_triage,
-               collect_library=False):
+               collect_library=False, load_data_test=False, save_data=False):
 
         NumericConstant.accepted_types = [set(numeric_constant_values)]
         StringConstant.accepted_types = [set(string_constant_values)]
         VarList.accepted_types = [set(variables_list)]
         VarScalar.accepted_types = [set(variables_scalar)]
         # VarScalarFromArray.accepted_types = [set(variables_scalar_from_array)]
+        if load_data_test:
+            self.load_data()
+            current_size = self.current_size
+            best_program = self.best_program
+            best_winrate = self.best_winrate
+            p = self.p
+            print(p.to_string())
+            if use_triage:
+                score, _, number_matches_played = eval_function.eval_triage(p, best_winrate)
+            else:
+                score, _, number_matches_played = eval_function.eval(p)
+            if best_program is None or score > best_winrate:
+                best_winrate = score
+                best_program = p
+                print("Found")
+                print(p.to_string())
 
-        self.closed_list = set()
-        self.programs_outputs = set()
+        else:
+            self.closed_list = set()
+            self.programs_outputs = set()
 
-        initial_set_of_programs = self.generate_initial_set_of_programs(numeric_constant_values,
-                                                                        string_constant_values,
-                                                                        variables_scalar,
-                                                                        variables_list,
-                                                                        functions_scalars)
-        self.plist = ProgramList()
-        for p in initial_set_of_programs:
-            self.plist.insert(p)
+            initial_set_of_programs = self.generate_initial_set_of_programs(numeric_constant_values,
+                                                                            string_constant_values,
+                                                                            variables_scalar,
+                                                                            variables_list,
+                                                                            functions_scalars)
+            self.plist = ProgramList()
+            for p in initial_set_of_programs:
+                self.plist.insert(p)
+            number_programs_evaluated = 0
+            number_games_played = 0
+            current_size = 0
+            best_winrate = 0.0
+            best_program = None
 
-        number_programs_evaluated = 0
-        number_games_played = 0
-        current_size = 0
+            while current_size <= bound:
 
-        best_winrate = 0.0
-        best_program = None
+                number_evaluations_bound = 0
 
-        while current_size <= bound:
+                for p in self.grow(operations, current_size):
+                    number_programs_evaluated += 1
+                    number_evaluations_bound += 1
+                    if type(p) == ReturnPlayerAction:
+                        if save_data:
+                            self.best_program = best_program
+                            self.best_winrate = best_winrate
+                            self.current_size = current_size
+                            self.p = p
+                            self.save()
 
-            number_evaluations_bound = 0
-
-            for p in self.grow(operations, current_size):
-                number_programs_evaluated += 1
-                number_evaluations_bound += 1
-                if type(p) == ReturnPlayerAction:
-
-                    print(p.to_string())
-                    # print("Yes")
-                    if collect_library:
-                        score = 0
-                    else:
-                        if use_triage:
-                            score, _, number_matches_played = eval_function.eval_triage(p, best_winrate)
-                            # if score > 0:
-                            # print(score, number_matches_played)
-                        else:
-                            score, _, number_matches_played = eval_function.eval(p)
-                        number_games_played += number_matches_played
-
-                    if best_program is None or score > best_winrate:
-                        best_winrate = score
-                        best_program = p
-                        print("Found")
                         print(p.to_string())
+                        # print("Yes")
+                        if collect_library:
+                            score = 0
+                        else:
+                            if use_triage:
+                                score, _, number_matches_played = eval_function.eval_triage(p, best_winrate)
+                                # if score > 0:
+                                # print(score, number_matches_played)
+                            else:
+                                score, _, number_matches_played = eval_function.eval(p)
+                            number_games_played += number_matches_played
 
-            current_size += 1
+                        if best_program is None or score > best_winrate:
+                            best_winrate = score
+                            best_program = p
+                            print("Found")
+                            print(p.to_string())
 
-            if collect_library:
-                return self.plist.plist
+                current_size += 1
 
-        return best_winrate, best_program, number_programs_evaluated, number_games_played
+                if collect_library:
+                    return self.plist.plist
+
+            return best_winrate, best_program, number_programs_evaluated, number_games_played
