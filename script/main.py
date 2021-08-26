@@ -1,94 +1,113 @@
-'''
-Author: Ethan Chen
-Date: 2021-07-29 04:00:05
-LastEditTime: 2021-07-29 04:00:33
-LastEditors: Ethan Chen
-Description: 
-FilePath: /script/main.py
-'''
-
 from Game import *
 from BUS import *
 from evaluation import *
 from base_dsl import *
 from simulated_annealing import *
 import faulthandler
+import numpy as np
+import argparse
 
 
 if __name__ == '__main__':
     faulthandler.enable()
-    p = ReturnPlayerAction.new(
-        Argmin.new(
-            MaxDistancesFromMovePositionsToEnemyUnit()
+    np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-search', action='store', dest='search_algorithm',
+                        default='BottomUpSearch',
+                        help='Search Algorithm (SimulatedAnnealing, BottomUpSearch, UCT)')
+
+    parser.add_argument('-bound', action='store', dest='bound',
+                        help='Bound for Bottom-Up Search')
+
+    parser.add_argument('-e', action='store', dest='eval_function',
+                        default='EvalProgramDefeatsStrategy',
+                        help='Evaluation function')
+
+    parser.add_argument('-n', action='store', dest='number_games', default=10,
+                        help='Number of games played in each evaluation')
+
+    parser.add_argument('-time', action='store', dest='time_limit', default=120,
+                        help='Time limit in seconds')
+
+    parser.add_argument('-temperature', action='store', dest='initial_temperature', default=100,
+                        help='SA\'s initial temperature')
+
+    parser.add_argument('-alpha', action='store', dest='alpha', default=0.6,
+                        help='SA\'s alpha value')
+
+    parser.add_argument('-beta', action='store', dest='beta', default=100,
+                        help='SA\'s beta value')
+
+    parser.add_argument('-log_file', action='store', dest='log_file',
+                        help='File in which results will be saved')
+
+    parser.add_argument('-program_file', action='store', dest='program_file',
+                        help='File in which programs will be saved')
+
+    parser.add_argument('--detect-equivalence', action='store_true', default=False,
+                        dest='detect_equivalence',
+                        help='Detect observational equivalence in Bottom-Up Search.')
+
+    parser.add_argument('--triage', action='store_true', default=False,
+                        dest='use_triage',
+                        help='Use a 3-layer triage for evaluating programs.')
+
+    parser.add_argument('--iterated-best-response', action='store_true', default=False,
+                        dest='run_ibr',
+                        help='It will run Iterated Best Response')
+
+    parameters = parser.parse_args()
+
+    number_games = int(parameters.number_games)
+    eval_function = globals()[parameters.eval_function](number_games)
+
+    time_limit = int(parameters.time_limit)
+    algorithm = globals()[parameters.search_algorithm](parameters.log_file, parameters.program_file)
+    bidirectional_depth = int(parameters.bidirectional_depth)
+
+    if isinstance(algorithm, BottomUpSearch):
+        algorithm.search(
+            int(parameters.bound),
+            [ReturnPlayerAction, Times, Plus, Minus, Argmax, Argmin, IT, ITE, LT, Sum],
+            [0, 5, 50],
+            ['y'],
+            ['num_attacks', 'num_moves', 'num_reload'],
+            ['moves_distance', 'enemy_distance', 'enemy_hp', 'enemy_range', 'enemy_damage', 'enemy_dpf'],
+            [LTD_Score,
+             LTD2_Score,
+             LTD2_PlayerOverOpponent,
+             LTD2_PlayerOverOpponent,
+             HasAttackActions,
+             HasMoveActions,
+             HasReloadActions,
+             AveDistancesFromMovePositionsToEnemyUnit,
+             MinDistancesFromMovePositionsToEnemyUnit,
+             MaxDistancesFromMovePositionsToEnemyUnit],
+            eval_function,
+            parameters.use_triage,
+            time_limit
         )
-    )
-    # open Sparcraft as subprocess
-    # game = Game(NOKDPS(), AttackWeakest())
-    # game.run_experiment()
-    # game.print_result()
-
-    # p = ReturnPlayerAction.new(
-    #     ITE.new(
-    #         HasAttackActions(),
-    #         Argmin.new(VarList.new('enemy_hp')),
-    #         ITE.new(
-    #             HasMoveActions(),
-    #             Argmin.new(MinDistancesFromMovePositionsToEnemyUnit()),
-    #             NumericConstant.new(0)
-    #         )
-    #     ))
-    # player = ProgramPlayer(p)
-    # game = Game(player, AttackWeakestNOK(), num_exp=200)
-    # game.run_experiment()
-    # game.print_result()
-
-    bound = 10
-    use_triage = True
-    save_data = True
-    eval_function = PlayWithRandomPlayer(10)
-    algorithm = ButtomUpSearch('', '')
-    algorithm.search(
-        bound,
-        [ReturnPlayerAction, Times, Plus, Minus, Argmax, Argmin, IT, ITE, LT, Sum],
-        [0, 5, 50],
-        ['y'],
-        ['num_attacks', 'num_moves', 'num_reload'],
-        ['moves_distance', 'enemy_distance', 'enemy_hp', 'enemy_range', 'enemy_damage', 'enemy_dpf'],
-        [LTD_Score,
-         LTD2_Score,
-         LTD2_PlayerOverOpponent,
-         LTD2_PlayerOverOpponent,
-         HasAttackActions,
-         HasMoveActions,
-         HasReloadActions,
-         AveDistancesFromMovePositionsToEnemyUnit,
-         MinDistancesFromMovePositionsToEnemyUnit,
-         MaxDistancesFromMovePositionsToEnemyUnit],
-        eval_function,
-        use_triage,
-        load_data_test=False,
-        save_data=save_data
-    )
-
-    # algorithm = SimulatedAnnealing('', '')
-
-    # terminals = [LTD_Score,
-    #              LTD_Score,
-    #              LTD2_Score,
-    #              LTD2_PlayerOverOpponent,
-    #              LTD2_PlayerOverOpponent,
-    #              HasAttackActions,
-    #              HasMoveActions,
-    #              HasReloadActions]
-    # algorithm.search([Times, Plus, Minus, Argmax, Argmin, IT, ITE, LT, Sum, ReturnPlayerAction],
-    #                  [0, 5, 50],
-    #                  ['y'],
-    #                  ['num_attacks', 'num_moves', 'num_reload'],
-    #                  ['moves_distance', 'enemy_distance', 'enemy_hp', 'enemy_range', 'enemy_damage', 'enemy_dpf'],
-    #                  terminals,
-    #                  eval_function,
-    #                  use_triage,
-    #                  float(100),
-    #                  float(0.6),
-    #                  float(100),
-    #                  120000, initial_program=p)
+    if isinstance(algorithm, SimulatedAnnealing):
+        terminals = [LTD_Score,
+                     LTD_Score,
+                     LTD2_Score,
+                     LTD2_PlayerOverOpponent,
+                     LTD2_PlayerOverOpponent,
+                     HasAttackActions,
+                     HasMoveActions,
+                     HasReloadActions]
+        algorithm.search([Times, Plus, Minus, Argmax, Argmin, IT, ITE, LT, Sum, ReturnPlayerAction],
+                         [0, 5, 50],
+                         ['y'],
+                         ['num_attacks', 'num_moves', 'num_reload'],
+                         ['moves_distance', 'enemy_distance', 'enemy_hp', 'enemy_range', 'enemy_damage', 'enemy_dpf'],
+                         terminals,
+                         eval_function,
+                         parameters.use_triage,
+                         float(100),
+                         float(0.6),
+                         float(100),
+                         120000)
+        pass

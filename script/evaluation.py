@@ -1,14 +1,13 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 11:04:23
-LastEditTime: 2021-07-26 05:58:59
+LastEditTime: 2021-08-22 23:56:53
 LastEditors: Ethan Chen
 Description: Evaluation function for BUS
-FilePath: /Sparcraft/script/evaluation.py
+FilePath: \Sparcraft\script\evaluation.py
 '''
 
 import os
-# from Player_AttackClosest import AttackClosest
 from Game import Game
 from GameState import *
 from Player_Random import RandomPlayer
@@ -44,15 +43,17 @@ class Evaluation():
 
         Evaluation.number_matches_played += 1
 
-        game = Game(p1, p2)
-        game.run_experiment()
+        game = Game(p1, p2, num_exp=1)
+        has_error = game.run_experiment()
+        if has_error:
+            return False, None
         result = game.get_result()
 
         if result[0] > result[1]:
-            return p1
+            return True, p1
         elif result[0] < result[1]:
-            return p2
-        return None
+            return True, p2
+        return False, None
 
     def play_n_matches(self, n, p1, p2):
 
@@ -61,19 +62,15 @@ class Evaluation():
 
         Evaluation.number_matches_played = 0
 
-        try:
-            game = Game(p1, p2, num_exp=n)
-            game.run_experiment()
+        game = Game(p1, p2, num_exp=n)
+        has_error = game.run_experiment()
 
-            result = game.get_result()
-
-            br_victories = result[1]
-            player_victories = result[2]
-
-        except Exception as e:
-            print(e)
+        if has_error:
             return None, None, True
 
+        result = game.get_result()
+        br_victories = result[1]
+        player_victories = result[2]
         return player_victories, br_victories, False
 
     @staticmethod
@@ -142,14 +139,22 @@ class Evaluation():
                 args = ((index, program) for index in range(20))
                 results = executor.map(Evaluation.validate_parallel, args)
             for has_error in results:
+                print(has_error)
                 if has_error:
                     return True
-        except Exception:
+        except Exception as e:
+            print(e)
             return True
 
         return False
 
     def eval(self, br, player):
+
+        has_error = self.validate_on_records(br)
+        if has_error:
+            print("Validation Error")
+            return 0.0, has_error, self.number_evaluations
+        print("Pass")
 
         _, br_victories, error = self.play_n_matches(self.number_evaluations, br, player)
 
@@ -165,14 +170,17 @@ class Evaluation():
 
         br_victories = None
         error = None
-        for i in range(20):
-            data = [i, br]
-            has_error = self.validate_parallel(data)
-            if has_error:
-                print("Error Validation")
-                return 0.0, True, number_matches_played
-            else:
-                print("Pass")
+        has_error = self.validate_on_records(br)
+        # for i in range(20):
+        #     data = [i, br]
+        #     has_error = self.validate_parallel(data)
+        #     if has_error:
+        #         print("Error Validation")
+        #         return 0.0, True, number_matches_played
+        if has_error:
+            print("Validation Error")
+            return 0.0, has_error, number_matches_played
+        print("Pass")
 
         for i in range(len(number_matches_by_layer)):
             _, br_victories_local, error = self.play_n_matches(number_matches_by_layer[i], br, player)
@@ -182,7 +190,6 @@ class Evaluation():
             if error:
                 return 0.0, error, number_matches_played
 
-            # print("Successful")
             if br_victories is None:
                 br_victories = br_victories_local
             else:
@@ -193,16 +200,15 @@ class Evaluation():
 
             if br_victories / number_matches_played + (br_victories / number_matches_played) * self.relative_slack_triage[i] < current_best_score:
                 return br_victories / number_matches_played, error, number_matches_played
-        # return 0.0, True, number_matches_played
+
         return br_victories / number_matches_played, error, number_matches_played
 
 
-class PlayWithRandomPlayer(Evaluation):
-    def __init__(self, number_evaluations):
-        super(PlayWithRandomPlayer, self).__init__()
+class EvalProgramDefeatsStrategy(Evaluation):
+    def __init__(self, number_evaluations, player=AttackClosest()):
+        super(EvalProgramDefeatsStrategy, self).__init__()
         self.number_evaluations = number_evaluations
-        # self.player = RandomPlayer()
-        self.player = AttackWeakest()
+        self.player = player
 
     def eval(self, program):
         br = ProgramPlayer(program)
