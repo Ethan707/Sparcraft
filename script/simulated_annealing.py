@@ -1,10 +1,10 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-22 04:32:29
-LastEditTime: 2021-07-26 00:32:26
+LastEditTime: 2021-08-28 19:46:02
 LastEditors: Ethan Chen
-Description: 
-FilePath: /Sparcraft/script/simulated_annealing.py
+Description: SA for Sparcraft
+FilePath: \Sparcraft\script\simulated_annealing.py
 '''
 
 from base_dsl import *
@@ -23,11 +23,11 @@ class SimulatedAnnealing():
         self.log_folder = 'logs/'
         self.program_folder = 'programs/'
 
-        # if not os.path.exists(self.log_folder):
-        #     os.makedirs(self.log_folder)
+        if not os.path.exists(self.log_folder):
+            os.makedirs(self.log_folder)
 
-        # if not os.path.exists(self.program_folder):
-        #     os.makedirs(self.program_folder)
+        if not os.path.exists(self.program_folder):
+            os.makedirs(self.program_folder)
 
         self.log_file = 'sa-' + log_file
         self.program_file = 'sa-' + program_file

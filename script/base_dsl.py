@@ -1,10 +1,10 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 15:34:52
-LastEditTime: 2021-07-26 20:33:45
+LastEditTime: 2021-08-28 19:45:17
 LastEditors: Ethan Chen
 Description: DSL for Sparcarft
-FilePath: \Sparcraft\script\base_DSL.py
+FilePath: \Sparcraft\script\base_dsl.py
 '''
 import numpy as np
 from GameState import *
@@ -16,7 +16,7 @@ class Node:
         self.size = 1
         self.max_limit = 0  # max amount
         self.current_child_amount = 0  # current amount
-        self.children = []
+        self.children = []  # children list
 
         self.local = 'locals'
         self.intname = 'int'

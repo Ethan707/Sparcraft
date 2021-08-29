@@ -9,16 +9,17 @@ import argparse
 
 
 if __name__ == '__main__':
-    faulthandler.enable()
+    # the fault handler to trace the error
+    # faulthandler.enable()
     np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
 
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-search', action='store', dest='search_algorithm',
                         default='BottomUpSearch',
-                        help='Search Algorithm (SimulatedAnnealing, BottomUpSearch, UCT)')
+                        help='Search Algorithm (SimulatedAnnealing, BottomUpSearch)')
 
-    parser.add_argument('-bound', action='store', dest='bound',
+    parser.add_argument('-bound', action='store', dest='bound', default=20,
                         help='Bound for Bottom-Up Search')
 
     parser.add_argument('-e', action='store', dest='eval_function',
@@ -50,13 +51,13 @@ if __name__ == '__main__':
                         dest='detect_equivalence',
                         help='Detect observational equivalence in Bottom-Up Search.')
 
-    parser.add_argument('--triage', action='store_true', default=False,
+    parser.add_argument('--triage_eval', action='store_true', default=False,
                         dest='use_triage',
                         help='Use a 3-layer triage for evaluating programs.')
 
-    parser.add_argument('--iterated-best-response', action='store_true', default=False,
-                        dest='run_ibr',
-                        help='It will run Iterated Best Response')
+    parser.add_argument('--triage_valid', action='store_true', default=False,
+                        dest='use_triage',
+                        help='Use a 3-layer triage for validation set.')
 
     parameters = parser.parse_args()
 
@@ -65,7 +66,6 @@ if __name__ == '__main__':
 
     time_limit = int(parameters.time_limit)
     algorithm = globals()[parameters.search_algorithm](parameters.log_file, parameters.program_file)
-    bidirectional_depth = int(parameters.bidirectional_depth)
 
     if isinstance(algorithm, BottomUpSearch):
         algorithm.search(
@@ -110,4 +110,3 @@ if __name__ == '__main__':
                          float(0.6),
                          float(100),
                          120000)
-        pass

@@ -1,8 +1,4 @@
-from Player_Random import RandomPlayer
-from Player_AttackClosest import AttackClosest
-from Player_AttackWeakest import AttackWeakest
-from Player_Kiter_NOKDPS import Kiter_NOKDPS
-from Player_NOKDPS import NOKDPS
+from scripted_player import *
 from subprocess import Popen, PIPE
 from GameState import GameState, Unit
 
@@ -29,7 +25,7 @@ class Game:
     def processMessage(self, process: Popen):
         try:
             message = process.stdout.readline().decode('utf-8')
-            message = message.replace('\n', ' ').replace('\r', ' ')
+            message = message.replace('\n', '').replace('\r', '')
             l = message.split(' ')
             return False, l
         except Exception as e:
@@ -119,6 +115,7 @@ class Game:
                 for _ in range(self.num_exp):
                     is_finished = False
                     while not is_finished:
+                        # print(_)
                         has_error, is_finished = self.run_round(process)
                         self.state = GameState()
                         if has_error:
@@ -126,7 +123,6 @@ class Game:
         except Exception as e:
             print("Error in Games", e)
             return True
-
         return False
 
     def run_round(self, process):
@@ -136,6 +132,7 @@ class Game:
         # 3.draw
         has_error, message = self.processMessage(process)
         if has_error:
+            print("Error in message 1")
             return True, False
         if message[0] == "Begin":
             # the game is still in progressing, we need to keep it
@@ -144,6 +141,7 @@ class Game:
             if player_message[0] != "PlayerID" or not player_message[1].isdigit():
                 has_error = True
             if has_error:
+                print("Error in message 2")
                 return True, False
 
             self.state.player_id = int(player_message[1])
@@ -157,7 +155,7 @@ class Game:
             else:
                 decision = self.player_1.generate(self.state)
             # Return the move to sparcraft
-            self.returnMoves(decision)
+            self.returnMoves(decision, process)
             return False, False
 
         elif message[0] == "Winner":
@@ -171,6 +169,7 @@ class Game:
             self.winner[-1] += 1
             print("Draw")
             return False, True
+        # print(message)
         return True, False
 
     def get_result(self) -> list:

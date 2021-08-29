@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 11:04:23
-LastEditTime: 2021-08-22 23:56:53
+LastEditTime: 2021-08-29 00:35:59
 LastEditors: Ethan Chen
 Description: Evaluation function for BUS
 FilePath: \Sparcraft\script\evaluation.py
@@ -10,13 +10,9 @@ FilePath: \Sparcraft\script\evaluation.py
 import os
 from Game import Game
 from GameState import *
-from Player_Random import RandomPlayer
-from Player_AttackClosest import AttackClosest
-from Player_AttackWeakest import AttackWeakest
 from Program_Player import ProgramPlayer
-from Player_NOKDPS import NOKDPS
-from Player_AttackWeakestNOK import AttackWeakestNOK
 from concurrent.futures.process import ProcessPoolExecutor
+from scripted_player import *
 
 
 class Evaluation():
@@ -139,7 +135,7 @@ class Evaluation():
                 args = ((index, program) for index in range(20))
                 results = executor.map(Evaluation.validate_parallel, args)
             for has_error in results:
-                print(has_error)
+                # print(has_error)
                 if has_error:
                     return True
         except Exception as e:
@@ -171,12 +167,6 @@ class Evaluation():
         br_victories = None
         error = None
         has_error = self.validate_on_records(br)
-        # for i in range(20):
-        #     data = [i, br]
-        #     has_error = self.validate_parallel(data)
-        #     if has_error:
-        #         print("Error Validation")
-        #         return 0.0, True, number_matches_played
         if has_error:
             print("Validation Error")
             return 0.0, has_error, number_matches_played

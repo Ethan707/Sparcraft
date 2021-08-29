@@ -62,40 +62,25 @@ class BottomUpSearch():
         for i in variables_scalar:
             p = VarScalar.new(i)
 
-            # if self.detect_equivalence and self.has_equivalent(p):
-            #     continue
-
             set_of_initial_programs.append(p)
 
         for i in variables_list:
             p = VarList.new(i)
-
-            # if self.detect_equivalence and self.has_equivalent(p):
-            #     continue
 
             set_of_initial_programs.append(p)
 
         for i in numeric_constant_values:
             constant = NumericConstant.new(i)
 
-            # if self.detect_equivalence and self.has_equivalent(constant):
-            #     continue
-
             set_of_initial_programs.append(constant)
 
         for i in string_constant_values:
             constant = StringConstant.new(i)
 
-            # if self.detect_equivalence and self.has_equivalent(constant):
-            #     continue
-
             set_of_initial_programs.append(constant)
 
         for i in functions_scalars:
             p = i()
-
-            # if self.detect_equivalence and self.has_equivalent(p):
-            #     continue
 
             set_of_initial_programs.append(p)
 
