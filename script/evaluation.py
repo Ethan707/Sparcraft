@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-15 11:04:23
-LastEditTime: 2021-08-29 00:35:59
+LastEditTime: 2021-09-02 00:06:20
 LastEditors: Ethan Chen
 Description: Evaluation function for BUS
 FilePath: \Sparcraft\script\evaluation.py
@@ -25,6 +25,7 @@ class Evaluation():
         self.relative_slack_triage = [0.3, 0.2]
 
     def number_matches_triage(self, total_number_matches):
+        '''triage setting for three layers [10% 40% 50%]'''
         first_layer = int(total_number_matches * 0.1)
         second_layer = int(total_number_matches * 0.4)
         third_layer = int(total_number_matches * 0.5)
@@ -33,6 +34,9 @@ class Evaluation():
         return [first_layer, second_layer, third_layer]
 
     def play_match(self, p1, p2, save_state_action_pairs=False):
+        '''play one match with two given player
+        return {has_finished, winner}
+        '''
 
         if save_state_action_pairs:
             self.state_action_pairs = []
@@ -43,15 +47,21 @@ class Evaluation():
         has_error = game.run_experiment()
         if has_error:
             return False, None
-        result = game.get_result()
+        result = game.get_result()  # result: [player1, player2, draw]
 
         if result[0] > result[1]:
             return True, p1
         elif result[0] < result[1]:
             return True, p2
+        # the game will be draw if the players played too many steps
+        # this had been set in the C++ file TODO
+        # for example, player one only move to right and player two only move to left
         return False, None
 
     def play_n_matches(self, n, p1, p2):
+        '''play n matches with two given players
+            return {player_victories, br_victories, has_error}
+        '''
 
         br_victories = 0
         player_victories = 0
@@ -71,14 +81,20 @@ class Evaluation():
 
     @staticmethod
     def validate_parallel(data):
-        index = data[0]
-        program = data[1]
+        '''
+            validate the program on game records,
+            it is similar to the processGameState in Game.py
 
-        game = GameState()
+            return {has_error}
+        '''
+        index = data[0]  # index of the file [0...19]
+        program = data[1]  # program needed to be validated
+
         path_name = '../game_record/'
-        file_name = path_name+'record_'+str(index+1)+'.txt'
+        file_name = path_name+'record_'+str(index)+'.txt'
         try:
             with open(file_name) as f:
+                game = GameState()
                 lines = f.readlines()
                 for line in lines:
                     message = line.split(' ')
@@ -113,29 +129,34 @@ class Evaluation():
                         # set up the move
                         game.player_unit[unitIndex].moves.append([moveType, moveIndex, position_x, position_y])
                     elif message[0] == 'End':
+                        # if the game sate is end, generate decisions with the program
                         decision = program.generate(game)
-                        i = 0
+                        i = 0  # the index of the decisions
                         for unit in game.player_unit:
+                            # for each player, if it has avaliable moves, the program should return the move index with below rules
+                            # 1. the move index is in [0...len(avaliable moves)]
+                            # 2. it is an integer
                             if len(unit.moves) > 0:
                                 assert decision[i] >= 0
                                 assert decision[i] < len(unit.moves)
                                 assert isinstance(decision[i], int)
                                 i += 1
-                        game.clear()
         except Exception:
-            return True
+            return True  # has error
         return False
 
     def validate_on_records(self, program):
+        '''validate program parallely and return {has_error}'''
 
-        self.ncpus = int(os.environ.get('SLURM_CPUS_PER_TASK', default=4))
+        self.ncpus = int(os.environ.get('SLURM_CPUS_PER_TASK', default=4))  # num of CPUs
 
+        # parallel computation
         try:
             with ProcessPoolExecutor(max_workers=self.ncpus) as executor:
                 args = ((index, program) for index in range(20))
                 results = executor.map(Evaluation.validate_parallel, args)
             for has_error in results:
-                # print(has_error)
+                # if has error, quit
                 if has_error:
                     return True
         except Exception as e:
@@ -145,13 +166,21 @@ class Evaluation():
         return False
 
     def eval(self, br, player):
+        '''
+            basic evaluation function
+            param {br}: the generated ProgramPlayer(program)
+            param {player}: opponent
+            return {winning_rate, has_error, number_evaluation}
+        '''
 
+        # if the program do not pass the validation on game records, quit
         has_error = self.validate_on_records(br)
         if has_error:
             print("Validation Error")
             return 0.0, has_error, self.number_evaluations
         print("Pass")
 
+        # if the program pass the validation, go on real games
         _, br_victories, error = self.play_n_matches(self.number_evaluations, br, player)
 
         if error:
@@ -160,18 +189,28 @@ class Evaluation():
         return br_victories / self.number_evaluations, error, self.number_evaluations
 
     def eval_triage(self, br, player, current_best_score):
+        '''
+            basic triage evaluation function
+            basic evaluation function
+            param {br}: the generated ProgramPlayer(program)
+            param {player}: opponent
+            param {current_best_score}: current best winning rate
+            return {winning_rate, has_error, number_evaluation}
+        '''
 
         number_matches_by_layer = self.number_matches_triage(self.number_evaluations)
         number_matches_played = 0
 
         br_victories = None
         error = None
+        # if the program do not pass the validation on game records, quit
         has_error = self.validate_on_records(br)
         if has_error:
             print("Validation Error")
             return 0.0, has_error, number_matches_played
         print("Pass")
 
+        # run the evaluation for each layer in the triage
         for i in range(len(number_matches_by_layer)):
             _, br_victories_local, error = self.play_n_matches(number_matches_by_layer[i], br, player)
 
@@ -195,6 +234,11 @@ class Evaluation():
 
 
 class EvalProgramDefeatsStrategy(Evaluation):
+    '''
+        Evaluate the program with given player
+        Default player: AttackClosest
+    '''
+
     def __init__(self, number_evaluations, player=AttackClosest()):
         super(EvalProgramDefeatsStrategy, self).__init__()
         self.number_evaluations = number_evaluations

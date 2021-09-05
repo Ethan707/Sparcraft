@@ -3,7 +3,7 @@ from BUS import *
 from evaluation import *
 from base_dsl import *
 from simulated_annealing import *
-import faulthandler
+# import faulthandler # fault handler library import
 import numpy as np
 import argparse
 
@@ -61,10 +61,10 @@ if __name__ == '__main__':
 
     parameters = parser.parse_args()
 
-    number_games = int(parameters.number_games)
-    eval_function = globals()[parameters.eval_function](number_games)
+    number_games = int(parameters.number_games)  # amount of games for evaluating the program
+    eval_function = globals()[parameters.eval_function](number_games)  # evaluation method
 
-    time_limit = int(parameters.time_limit)
+    time_limit = int(parameters.time_limit)  # time limit for searching
     algorithm = globals()[parameters.search_algorithm](parameters.log_file, parameters.program_file)
 
     if isinstance(algorithm, BottomUpSearch):

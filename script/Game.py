@@ -11,30 +11,48 @@ EXE_FILE = '../bin/SparCraft'
 
 class Game:
     def __init__(self, player_0, player_1, exp_file=EXP_FILE, execute_file=EXE_FILE, num_exp=10):
-        self.player_0 = player_0
-        self.player_1 = player_1
-        self.exp_file = exp_file
-        self.num_exp = num_exp
-        self.winner = [0]*3  # player 0 | player 1 | draw
-        self.execute_file = execute_file
+        self.player_0 = player_0  # player 0
+        self.player_1 = player_1  # player 1
+        self.exp_file = exp_file  # experiment config file path
+        self.num_exp = num_exp    # number of experiments for the evaluation
+        self.winner = [0]*3       # player 0 | player 1 | draw
+        self.execute_file = execute_file  # execute file path
         self.state = GameState()
 
+        # set up the player id
         self.player_0.set_player_id(0)
         self.player_1.set_player_id(1)
 
     def processMessage(self, process: Popen):
+        '''
+            read the message from Sparcraft
+            return {has_error, words_list}
+        '''
         try:
             message = process.stdout.readline().decode('utf-8')
             message = message.replace('\n', '').replace('\r', '')
             l = message.split(' ')
             return False, l
         except Exception as e:
-            print("Error: in Reading message from SparCraft")
+            print("Error: in reading message from SparCraft")
             print("Error:", e)
             return True, []
-    # has_error, list
 
     def processGameState(self, process: Popen):
+        '''
+            process the game state information and store them
+            retrun {has_error}
+        '''
+
+        # types of game state information
+        # 0. Begin (processed in run_round)
+        # 1. PlayerID xxx (processed in run_round)
+        # 2. Time xxx
+        # 3. Unit xxx
+        # 4. Move xxx
+        # 5. End
+        # 6. Winner xxx (processed in run_round)
+        # 7. Draw (processed in run_round)
         has_error = False
         while not has_error:
             has_error, message = self.processMessage(process)
@@ -98,9 +116,11 @@ class Game:
                 else:
                     print("Unknown message:", " ".join(message))
                     return True
-    # has_error
 
     def returnMoves(self, decision: list, process: Popen):
+        '''
+            return decisions to Sparcraft
+        '''
         try:
             moveString = ' '.join(str(i) for i in decision)+'\n'
             process.stdin.write(str.encode(moveString))
@@ -110,22 +130,30 @@ class Game:
             print(decision)
 
     def run_experiment(self):
+        '''
+            function to run the experiment
+            return {has_error}
+        '''
         try:
             with Popen([self.execute_file, self.exp_file, str(self.num_exp)], stdin=PIPE, stdout=PIPE, stderr=PIPE) as process:
                 for _ in range(self.num_exp):
                     is_finished = False
                     while not is_finished:
-                        # print(_)
                         has_error, is_finished = self.run_round(process)
                         self.state = GameState()
                         if has_error:
                             raise Exception
         except Exception as e:
+            # mostly is the error that the decisions are out of the index (the program pass the validation function luckily)
             print("Error in Games", e)
             return True
         return False
 
     def run_round(self, process):
+        '''
+            Process the game in each round
+            Return {has_error, has_finished}
+        '''
         # three occasions:
         # 1.gamestate infomation
         # 2.win
@@ -154,7 +182,7 @@ class Game:
                 decision = self.player_0.generate(self.state)
             else:
                 decision = self.player_1.generate(self.state)
-            # Return the move to sparcraft
+            # Return moves to sparcraft
             self.returnMoves(decision, process)
             return False, False
 
@@ -169,7 +197,6 @@ class Game:
             self.winner[-1] += 1
             print("Draw")
             return False, True
-        # print(message)
         return True, False
 
     def get_result(self) -> list:

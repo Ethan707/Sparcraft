@@ -1,7 +1,7 @@
 '''
 Author: Ethan Chen
 Date: 2021-07-05 16:30:54
-LastEditTime: 2021-08-23 00:19:14
+LastEditTime: 2021-09-05 15:11:01
 LastEditors: Ethan Chen
 Description: Buttom up search for sparcraft
 FilePath: \Sparcraft\script\BUS.py
@@ -61,27 +61,22 @@ class BottomUpSearch():
 
         for i in variables_scalar:
             p = VarScalar.new(i)
-
             set_of_initial_programs.append(p)
 
         for i in variables_list:
             p = VarList.new(i)
-
             set_of_initial_programs.append(p)
 
         for i in numeric_constant_values:
             constant = NumericConstant.new(i)
-
             set_of_initial_programs.append(constant)
 
         for i in string_constant_values:
             constant = StringConstant.new(i)
-
             set_of_initial_programs.append(constant)
 
         for i in functions_scalars:
             p = i()
-
             set_of_initial_programs.append(p)
 
         return set_of_initial_programs
@@ -102,6 +97,7 @@ class BottomUpSearch():
         return self.closed_list
 
     def save(self):
+        '''save the program to avoid recessive error'''
         with open('data.txt', 'wb') as f:
             pickle.dump(self.closed_list, f, -1)
             pickle.dump(self.programs_outputs, f, -1)
@@ -112,6 +108,7 @@ class BottomUpSearch():
             pickle.dump(self.p, f, -1)
 
     def load_data(self):
+        '''load the program from the file for debugging'''
         with open('data.txt', 'rb') as f:
             self.closed_list = pickle.load(f)
             self.programs_outputs = pickle.load(f)
@@ -140,7 +137,6 @@ class BottomUpSearch():
         StringConstant.accepted_types = [set(string_constant_values)]
         VarList.accepted_types = [set(variables_list)]
         VarScalar.accepted_types = [set(variables_scalar)]
-        # VarScalarFromArray.accepted_types = [set(variables_scalar_from_array)]
 
         self.closed_list = set()
         self.programs_outputs = set()
